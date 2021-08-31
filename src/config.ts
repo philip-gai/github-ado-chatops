@@ -1,12 +1,3 @@
-export type EnvironmentVar = 'ADO_PAT' | 'ADO_ORG' | 'ADO_PROJECT' | 'ADO_REPO' | 'ADO_INSTANCE';
-export interface ADOConfig {
-    instance: string;
-    organization: string;
-    project: string;
-    repository: string;
-    pat: string;
-}
-
 export class Config {
     readonly ado: ADOConfig = {
         instance:  Config.getEnv('ADO_INSTANCE'),
@@ -24,4 +15,14 @@ export class Config {
         }
         return val;
     }
+}
+
+export type EnvironmentVar = 'ADO_PAT' | 'ADO_ORG' | 'ADO_PROJECT' | 'ADO_REPO' | 'ADO_INSTANCE';
+
+export interface ADOConfig {
+    instance: string;
+    organization: string;
+    project: string;
+    repository: string;
+    pat: string;
 }

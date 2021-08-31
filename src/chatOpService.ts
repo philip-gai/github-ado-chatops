@@ -12,7 +12,7 @@ export class ChatOpService {
 
     private _app: Probot;
 
-    constructor(adoClient: AzureDevOpsClient, app: Probot) {
+    constructor(app: Probot, adoClient: AzureDevOpsClient) {
         this._adoClient = adoClient;
         this._app = app;
     }

@@ -1,22 +1,68 @@
 import * as azdev from "azure-devops-node-api";
 import { IGitApi } from "azure-devops-node-api/GitApi";
+import { GitRepository, GitRefUpdate } from "azure-devops-node-api/interfaces/GitInterfaces";
+import { Probot } from "probot";
 import { ADOConfig } from "./config";
 
 export class AzureDevOpsClient {
 
     private _connection: azdev.WebApi;
+    private _config: ADOConfig;
+    private _app: Probot;
 
-    constructor(config: ADOConfig) {
+    constructor(app: Probot, config: ADOConfig) {
+        this._config = config;
+        this._app = app;
+
         const orgUrl = `https://${config.instance}/${config.organization}`;
         const authHandler = azdev.getPersonalAccessTokenHandler(config.pat); 
-        this._connection = new azdev.WebApi(orgUrl, authHandler);    
+        this._connection = new azdev.WebApi(orgUrl, authHandler);
     }
 
-    getGitApi = async (): Promise<IGitApi> => {
-        return await this._connection.getGitApi();
+    async createBranch(branchName: string) {
+        const gitClient = await this._connection.getGitApi();
+        const repo = await this.getRepo(gitClient);
+        const defaultBranch = this.getDefaultBranch(repo);
+
+        const gitRefs = await gitClient.getRefs(repo.id as string, this._config.project, defaultBranch);
+        const sourceRef = gitRefs[0];
+
+        const gitRefUpdates: GitRefUpdate[] = [
+            { 
+                oldObjectId: new Array(40).join( '0' ),
+                newObjectId: sourceRef.objectId,
+                name:`refs/heads/${this._config.repository}/${branchName}`
+            }
+        ]
+
+        // create a new branch from the source
+        const updateResults = await gitClient.updateRefs(
+            gitRefUpdates,
+            this._config.repository
+        );
+        const refCreateResult = updateResults[0];
+        
+        this._app.log.info(`project ${this._config.project}, repo ${repo.name}, source branch ${sourceRef.name}`);
+        this._app.log.info(`new branch ${refCreateResult.name} (success=${refCreateResult.success} status=${refCreateResult.updateStatus})`);
+
+        return refCreateResult.success || false;
     }
 
-    createBranch(branchName: string) {
-        throw new Error("Method not implemented.");
+    private getDefaultBranch(repo: GitRepository) {
+        const defaultBranch = repo.defaultBranch?.replace('refs/', '');
+        if (!defaultBranch) {
+            console.error(`${defaultBranch} does not exist`);
+            process.exit(1);
+        }
+        return defaultBranch;
+    }
+
+    private async getRepo(gitClient: IGitApi) {
+        const repo = await gitClient.getRepository(this._config.repository, this._config.project);
+        if (!repo.id) {
+            console.error(`Repo ${this._config.repository} does not exist in project ${this._config.project}`);
+            process.exit(1);
+        }
+        return repo;
     }
 }

@@ -5,18 +5,11 @@ import { Config } from "./config";
 import { IssueCommentHandler } from "./issueCommentHandler";
 
 export = (app: Probot) => {
-  // For when config is needed
+  // Initialize Services
   const config = new Config();
-  
-  const adoClient = new AzureDevOpsClient(config.ado);
-  const chatOpService = new ChatOpService(adoClient, app);
+  const adoClient = new AzureDevOpsClient(app, config.ado);
+  const chatOpService = new ChatOpService(app, adoClient);
   
   // Create handlers and register event listeners
   new IssueCommentHandler(chatOpService).registerEventListeners(app);
-
-  // For more information on building apps:
-  // https://probot.github.io/docs/
-
-  // To get your app running against GitHub, see:
-  // https://probot.github.io/docs/development/
 };
