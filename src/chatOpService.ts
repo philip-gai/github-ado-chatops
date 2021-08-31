@@ -19,7 +19,7 @@ export class ChatOpService {
 
     async tryCreateBranch(comment: string, context: Context<any>): Promise<boolean> {
         // Check if the comment contains any createBranchChatCommands
-        //this._app.log.info("in TryCreateBranch");
+        this._app.log.info("in TryCreateBranch");
         if(!ChatOpService.containsChatOpCommand(comment, ChatOpService.createBranchChatOpCommands)) {
             this._app.log.info(`Comment ${context.payload.comment.url} does not contain createBranchChatOps`)
             return false;

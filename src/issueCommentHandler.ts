@@ -9,16 +9,12 @@ export class IssueCommentHandler {
         this._chatOpService = chatOpService;
     }
 
-    registerEventListeners = (app: Probot) => {
-        app.onAny(async (context) => {
-            app.log.info({ event: context.name, action: context.payload.action });
-          });
-        
-        //app.on("issues.opened", this.onCreated);
+    registerEventListeners = (app: Probot) => {  
+        app.on("issue_comment.created", this.onCreated);
     }
 
-    private onCreated = async (context: Context<EventPayloads.WebhookPayloadIssues >) => {
-        const issueComment = context.payload.issue.body;
+    private onCreated = async (context: Context<EventPayloads.WebhookPayloadIssueComment >) => {
+        const issueComment = context.payload.comment.body;
         this._chatOpService.tryCreateBranch(issueComment, context);
     }
 }
