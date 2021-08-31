@@ -14,7 +14,6 @@ export class Config {
         project: Config.getEnv('ADO_PROJECT'),
         repository:  Config.getEnv('ADO_REPO'),
         pat: Config.getEnv('ADO_PAT'),
-
     }
 
     static getEnv = (name: EnvironmentVar): string => {
