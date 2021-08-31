@@ -15,6 +15,7 @@ export class ChatOpService {
 
     // Maximum number of bytes in a git branch is 250
     // Therefore, trim branch name to 62 characters (assuming 32-bit/4-byte Unicode) => 238 bytes
+    // (https://stackoverflow.com/questions/60045157/what-is-the-maximum-length-of-a-github-branch-name)
     maxNumOfChars = 62;
 
     constructor(app: Probot, adoClient: AzureDevOpsClient) {
@@ -30,12 +31,7 @@ export class ChatOpService {
             return false;
         }
         // 2. If so, build the branch name from the issue title
-
-        this._app.log.info(` number: ${context.payload.issue.number}, title: ${context.payload.issue.title} `);
         const branchName = this.createBranchName(context.payload.issue.number, context.payload.issue.title);
-        this._app.log.info(` branch: ${branchName}`);
-        // Convention: {issue#}-words-in-issue-title-separated-by-hyphen
-        // Limit branch name length to 32 chars to be EXTRA safe (https://stackoverflow.com/questions/60045157/what-is-the-maximum-length-of-a-github-branch-name)
         
         // 3. Create the branch in ADO
         this._adoClient.createBranch(branchName);
@@ -61,6 +57,7 @@ export class ChatOpService {
 
         // TODO: implement user specific parameter for user path 
         returnString = 'users/mspletz/' + gitSafeString;
+        
         return returnString.substr(0, this.maxNumOfChars);
     }
 
