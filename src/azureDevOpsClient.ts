@@ -23,29 +23,39 @@ export class AzureDevOpsClient {
         const gitClient = await this._connection.getGitApi();
         const repo = await this.getRepo(gitClient);
         const defaultBranch = this.getDefaultBranch(repo);
+        const result = await this.createBranchInner(gitClient, repo, defaultBranch, branchName);
+        return result.success || false;
+    }
 
+    getBranchUrl(branchName: string) {
+        const uriEncodedBranchName = encodeURIComponent(branchName);
+        return `https://${this._config.instance}/${this._config.organization}/${this._config.project}/_git/${this._config.repository}?version=GB${uriEncodedBranchName}`;
+    }
+
+    private async createBranchInner(gitClient: IGitApi, repo: GitRepository, defaultBranch: string, branchName: string) {
         const gitRefs = await gitClient.getRefs(repo.id as string, this._config.project, defaultBranch);
         const sourceRef = gitRefs[0];
 
         const gitRefUpdates: GitRefUpdate[] = [
-            { 
-                oldObjectId: new Array(40).join( '0' ),
+            {
+                oldObjectId: new Array(41).join('0'),
                 newObjectId: sourceRef.objectId,
-                name:`refs/heads/${this._config.repository}/${branchName}`
+                name: `refs/heads/${branchName}`
             }
-        ]
+        ];
 
         // create a new branch from the source
         const updateResults = await gitClient.updateRefs(
             gitRefUpdates,
-            this._config.repository
+            this._config.repository,
+            this._config.project
         );
         const refCreateResult = updateResults[0];
-        
-        this._app.log.info(`project ${this._config.project}, repo ${repo.name}, source branch ${sourceRef.name}`);
-        this._app.log.info(`new branch ${refCreateResult.name} (success=${refCreateResult.success} status=${refCreateResult.updateStatus})`);
 
-        return refCreateResult.success || false;
+        this._app?.log.info(`project ${this._config.project}, repo ${repo.name}, source branch ${sourceRef.name}`);
+        this._app?.log.info(`new branch ${refCreateResult.name} (success=${refCreateResult.success} status=${refCreateResult.updateStatus})`);
+
+        return refCreateResult;
     }
 
     private getDefaultBranch(repo: GitRepository) {
