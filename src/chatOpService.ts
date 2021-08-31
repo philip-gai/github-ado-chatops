@@ -1,4 +1,4 @@
-import { Context } from "probot";
+import { Probot, Context } from "probot";
 import { AzureDevOpsClient } from "./azureDevOpsClient";
 
 export class ChatOpService {
@@ -10,14 +10,18 @@ export class ChatOpService {
 
     private _adoClient: AzureDevOpsClient;
 
-    constructor(adoClient: AzureDevOpsClient) {
+    private _app: Probot;
+
+    constructor(adoClient: AzureDevOpsClient, app: Probot) {
         this._adoClient = adoClient;
+        this._app = app;
     }
 
     async tryCreateBranch(comment: string, context: Context<any>): Promise<boolean> {
         // Check if the comment contains any createBranchChatCommands
+        //this._app.log.info("in TryCreateBranch");
         if(!ChatOpService.containsChatOpCommand(comment, ChatOpService.createBranchChatOpCommands)) {
-            context.log.trace(`Comment ${context.payload.comment.url} does not contain createBranchChatOps`)
+            this._app.log.info(`Comment ${context.payload.comment.url} does not contain createBranchChatOps`)
             return false;
         }
         // 2. If so, build the branch name from the issue title
