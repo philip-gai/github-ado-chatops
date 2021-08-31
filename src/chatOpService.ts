@@ -19,13 +19,16 @@ export class ChatOpService {
 
     async tryCreateBranch(comment: string, context: Context<any>): Promise<boolean> {
         // Check if the comment contains any createBranchChatCommands
-        this._app.log.info("in TryCreateBranch");
+        this._app.log.info(comment.trim());
         if(!ChatOpService.containsChatOpCommand(comment, ChatOpService.createBranchChatOpCommands)) {
             this._app.log.info(`Comment ${context.payload.comment.url} does not contain createBranchChatOps`)
             return false;
         }
         // 2. If so, build the branch name from the issue title
-        const branchName = '1234-words-in-issue-title-separated-by-hyphen';
+
+        this._app.log.info(` number: ${context.payload.issue.number}, title: ${context.payload.issue.title} `);
+        const branchName = this.createBranchName(context.payload.issue.number, context.payload.issue.title);
+        this._app.log.info(` branch: ${branchName}`);
         // Convention: {issue#}-words-in-issue-title-separated-by-hyphen
         // Limit branch name length to 32 chars to be EXTRA safe (https://stackoverflow.com/questions/60045157/what-is-the-maximum-length-of-a-github-branch-name)
         
@@ -45,4 +48,20 @@ export class ChatOpService {
         
         return true;
     }
+
+    createBranchName(issueNum: string, issueTitle :string): string {
+
+        let returnString = 'users/mspletz/' + issueNum + '-' + issueTitle;
+        const gitSafeString = this.makeGitSafe(returnString);
+        return gitSafeString;
+    }
+
+    makeGitSafe (s: string ) :string{
+        const replacementChar = '-';
+        const regexp = /(?![-/])[\W]+/g;
+        const result = s.replace(regexp, replacementChar).replace(/[/]+$/, '');
+        return result;
+        
+        //return trim(result, replacementChar)
+      }
 }
