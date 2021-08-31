@@ -1,12 +1,13 @@
 import { Probot } from "probot";
-import { Config } from "./config";
+// import { Config } from "./config";
 import { IssueCommentHandler } from "./issueCommentHandler";
 
 export = (app: Probot) => {
-  const config = new Config();
+  // For when config is needed
+  // const config = new Config();
   
   // Create handlers and register event listeners
-  new IssueCommentHandler(config).registerEventListeners(app);
+  new IssueCommentHandler().registerEventListeners(app);
 
   // For more information on building apps:
   // https://probot.github.io/docs/
