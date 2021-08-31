@@ -1,4 +1,5 @@
 import { Probot, Context } from "probot";
+import { TextEncoder } from "util";
 import { AzureDevOpsClient } from "./azureDevOpsClient";
 
 export class ChatOpService {
@@ -11,6 +12,10 @@ export class ChatOpService {
     private _adoClient: AzureDevOpsClient;
 
     private _app: Probot;
+
+    // Maximum number of bytes in a git branch is 250
+    // Therefore, trim branch name to 62 characters (assuming 32-bit/4-byte Unicode) => 238 bytes
+    maxNumOfChars = 62;
 
     constructor(app: Probot, adoClient: AzureDevOpsClient) {
         this._adoClient = adoClient;
@@ -51,17 +56,19 @@ export class ChatOpService {
 
     createBranchName(issueNum: string, issueTitle :string): string {
 
-        let returnString = 'users/mspletz/' + issueNum + '-' + issueTitle;
+        let returnString = issueNum + '-' + issueTitle;
         const gitSafeString = this.makeGitSafe(returnString);
-        return gitSafeString;
+
+        // TODO: implement user specific parameter for user path 
+        returnString = 'users/mspletz/' + gitSafeString;
+        return returnString.substr(0, this.maxNumOfChars);
     }
 
-    makeGitSafe (s: string ) :string{
+    makeGitSafe (s: string ) :string {
         const replacementChar = '-';
         const regexp = /(?![-/])[\W]+/g;
         const result = s.replace(regexp, replacementChar).replace(/[/]+$/, '');
+   
         return result;
-        
-        //return trim(result, replacementChar)
       }
 }
