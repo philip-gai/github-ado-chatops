@@ -1,4 +1,5 @@
 import { Context } from "probot";
+import { AzureDevOpsClient } from "./azureDevOpsClient";
 
 export class ChatOpService {
     private static createBranchChatOpCommands = ['/create-branch-ado', '/cb-ado']
@@ -7,7 +8,12 @@ export class ChatOpService {
         return chatOps.includes(comment.trim());
     }
 
-    
+    private _adoClient: AzureDevOpsClient;
+
+    constructor(adoClient: AzureDevOpsClient) {
+        this._adoClient = adoClient;
+    }
+
     async tryCreateBranch(comment: string, context: Context<any>): Promise<boolean> {
         // Check if the comment contains any createBranchChatCommands
         if(!ChatOpService.containsChatOpCommand(comment, ChatOpService.createBranchChatOpCommands)) {
@@ -20,6 +26,7 @@ export class ChatOpService {
         // Limit branch name length to 32 chars to be EXTRA safe (https://stackoverflow.com/questions/60045157/what-is-the-maximum-length-of-a-github-branch-name)
         
         // 3. Create the branch in ADO
+        this._adoClient.createBranch(branchName);
 
         // 4. Create a comment with a link to the newly created branch
         const result = `[Branch ${branchName}](url) has been created in Azure DevOps`

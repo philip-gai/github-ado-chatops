@@ -5,8 +5,8 @@ import { EventPayloads } from "@octokit/webhooks"
 export class IssueCommentHandler {
     private _chatOpService: ChatOpService;
     
-    constructor() {
-        this._chatOpService = new ChatOpService();
+    constructor(chatOpService: ChatOpService) {
+        this._chatOpService = chatOpService;
     }
 
     registerEventListeners = (app: Probot) => {
