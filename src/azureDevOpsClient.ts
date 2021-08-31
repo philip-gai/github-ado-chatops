@@ -24,7 +24,29 @@ export class AzureDevOpsClient {
         const repo = await this.getRepo(gitClient);
         const defaultBranch = this.getDefaultBranch(repo);
         const result = await this.createBranchInner(gitClient, repo, defaultBranch, branchName);
-        return result.success || false;
+        return result;
+    }
+
+    async deleteBranch(refName?: string, refObjectId?: string) {
+        const gitClient = await this._connection.getGitApi();
+
+        const gitRefUpdates: GitRefUpdate[] = [
+            {
+                oldObjectId: refObjectId,
+                newObjectId: new Array(41).join('0'),
+                name: refName
+            }
+        ];
+
+        // create a new branch from the source
+        const updateResults = await gitClient.updateRefs(
+            gitRefUpdates,
+            this._config.repository,
+            this._config.project
+        );
+        const refDeleteResult = updateResults[0];
+
+        return refDeleteResult;    
     }
 
     getBranchUrl(branchName: string) {
