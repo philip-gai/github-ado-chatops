@@ -19,7 +19,7 @@ export class AzureDevOpsClient {
         this._connection = new azdev.WebApi(orgUrl, authHandler);
     }
 
-    async createBranch(branchName: string) {
+    async createBranch(branchName: string, sourceBranch: string) {
         const gitClient = await this._connection.getGitApi();
         const repo = await this.getRepo(gitClient);
         const defaultBranch = this.getDefaultBranch(repo);

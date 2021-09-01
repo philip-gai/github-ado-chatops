@@ -52,12 +52,12 @@ describe("Chat Op Service", () => {
   });
 
   test("testing username parsing with /create-branch-ado", async () => {
-    const username = chatOpService.parseUsernameParameter('/create-branch-ado username jdoe');
+    const username = chatOpService.parseParameter('/create-branch-ado username jdoe', 'username');
     expect(username).toBe('jdoe');
   });
 
   test("testing username parsing with no username provided", async () => {
-    const username = chatOpService.parseUsernameParameter('/create-branch-ado username');
+    const username = chatOpService.parseParameter('/create-branch-ado username', 'username');
     expect(username).toBe('');
   });
 
