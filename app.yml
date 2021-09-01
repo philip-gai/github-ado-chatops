@@ -22,8 +22,8 @@ default_events:
   # - deployment_status
   # - fork
   # - gollum
-  # - issue_comment
-  - issues
+  - issue_comment
+  # - issues
 # - label
 # - milestone
 # - member
