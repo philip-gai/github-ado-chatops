@@ -6,6 +6,16 @@ name: Build Node.js app - github-ado-chatops-web
 on:
   pull_request:
   workflow_dispatch:
+  push:
+    branches:
+      - develop
+
+env:
+  ADO_INSTANCE: dev.azure.com
+  ADO_ORG: philip-gai
+  ADO_PROJECT: github-ado-chatops
+  ADO_REPO: github-ado-chatops
+  ADO_PAT: ${{ secrets.ADO_PAT }}
 
 jobs:
   build:
