@@ -1,6 +1,6 @@
 import * as azdev from "azure-devops-node-api";
 import { IGitApi } from "azure-devops-node-api/GitApi";
-import { GitRepository, GitRefUpdate } from "azure-devops-node-api/interfaces/GitInterfaces";
+import { GitRepository, GitRefUpdate, GitRefUpdateResult } from "azure-devops-node-api/interfaces/GitInterfaces";
 import { Probot } from "probot";
 import { ADOConfig } from "./config";
 
@@ -19,21 +19,22 @@ export class AzureDevOpsClient {
         this._connection = new azdev.WebApi(orgUrl, authHandler);
     }
 
-    async createBranch(branchName: string, sourceBranch: string) {
-        console.log(sourceBranch);
+    async createBranch(branchName: string, sourceBranch?: string): Promise<GitRefUpdateResult> {
         try {
             const gitClient = await this._connection.getGitApi();
             const repo = await this.getRepo(gitClient);
-            const defaultBranch = this.getDefaultBranch(repo);
-            const result = await this.createBranchInner(gitClient, repo, defaultBranch, branchName);
+
+            let sourceBranchFinal = sourceBranch;
+            if (!sourceBranchFinal) {
+                sourceBranchFinal = this.getDefaultBranch(repo);
+            }
+            const result = await this.createBranchInner(gitClient, repo, sourceBranchFinal, branchName);
             return result;
         }
         catch (error) {
             this._app.log.error(`POST to create branch [${branchName}] has failed`);
             throw new Error(`POST to create branch [${branchName}] has failed`);
         }
-
-
     }
 
     async deleteBranch(refName?: string, refObjectId?: string) {
@@ -63,8 +64,8 @@ export class AzureDevOpsClient {
         return `https://${this._config.instance}/${this._config.organization}/${this._config.project}/_git/${this._config.repository}?version=GB${uriEncodedBranchName}`;
     }
 
-    private async createBranchInner(gitClient: IGitApi, repo: GitRepository, defaultBranch: string, branchName: string) {
-        const gitRefs = await gitClient.getRefs(repo.id as string, this._config.project, defaultBranch);
+    private async createBranchInner(gitClient: IGitApi, repo: GitRepository, sourceBranch: string, branchName: string) {
+        const gitRefs = await gitClient.getRefs(repo.id as string, this._config.project, sourceBranch);
         const sourceRef = gitRefs[0];
 
         const gitRefUpdates: GitRefUpdate[] = [
