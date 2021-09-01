@@ -20,11 +20,20 @@ export class AzureDevOpsClient {
     }
 
     async createBranch(branchName: string, sourceBranch: string) {
-        const gitClient = await this._connection.getGitApi();
-        const repo = await this.getRepo(gitClient);
-        const defaultBranch = this.getDefaultBranch(repo);
-        const result = await this.createBranchInner(gitClient, repo, defaultBranch, branchName);
-        return result;
+        try{
+            const gitClient = await this._connection.getGitApi();
+            const repo = await this.getRepo(gitClient);
+            const defaultBranch = this.getDefaultBranch(repo);
+            const result = await this.createBranchInner(gitClient, repo, defaultBranch, branchName);
+            return result;
+        }
+        catch (error)
+        {
+            this._app.log.error(`POST to create branch [${branchName}] has failed`);
+            throw new Error(`POST to create branch [${branchName}] has failed`);
+        }
+
+        
     }
 
     async deleteBranch(refName?: string, refObjectId?: string) {
@@ -84,7 +93,7 @@ export class AzureDevOpsClient {
         const defaultBranch = repo.defaultBranch?.replace('refs/', '');
         if (!defaultBranch) {
             console.error(`${defaultBranch} does not exist`);
-            process.exit(1);
+            throw new Error(`${defaultBranch} does not exist`);
         }
         return defaultBranch;
     }
@@ -93,7 +102,7 @@ export class AzureDevOpsClient {
         const repo = await gitClient.getRepository(this._config.repository, this._config.project);
         if (!repo.id) {
             console.error(`Repo ${this._config.repository} does not exist in project ${this._config.project}`);
-            process.exit(1);
+            throw new Error(`Repo ${this._config.repository} does not exist in project ${this._config.project}`);
         }
         return repo;
     }

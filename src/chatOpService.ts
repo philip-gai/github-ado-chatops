@@ -37,9 +37,10 @@ export class ChatOpService {
             return false;
         }
 
-        let username = context.payload.comment.username;
+        let username :string = context.payload.comment.user.login;
         let sourceBranch = 'master'; //TODO: make this configurable for a default other than master
 
+        this._app.log.info(`string s: ${username}`);
         // Check for username parameter
         if (comment.includes(ChatOpService.usernameParameter))
         {
@@ -52,15 +53,34 @@ export class ChatOpService {
             sourceBranch = this.parseParameter(comment, ChatOpService.branchParameter);
         }
 
+       
         // Build the branch name from the issue title
         const branchName = this.createBranchName(username, context.payload.issue.number, context.payload.issue.title);
+        this._app.log.info(`built branch name string: ${branchName}`);
         
-        // Create the branch in ADO
-        // TODO: Implement branching from a different source branch other than master
-        this._adoClient.createBranch(branchName, sourceBranch);
+        try{
+            // Create the branch in ADO
+            this._adoClient.createBranch(branchName, sourceBranch);
+        }
+        catch(e)
+        {
+            // Create a comment that a failure occured
+            const result = `Branch [${branchName}] was unable to be created in Azure DevOps: ${e}`;
+            this._app.log.info(result);
+
+            const issue = context.issue();
+            await context.octokit.issues.createComment({
+                issue_number: issue.issue_number as number,
+                owner: issue.owner,
+                repo: issue.repo,
+                body: result
+             });
+             return false;
+        }
+
 
         // Create a comment with a link to the newly created branch
-        const result = `[Branch ${branchName}](url) has been created in Azure DevOps`
+        const result = `[Branch ${branchName}](${this._adoClient.getBranchUrl(branchName)}) has been created in Azure DevOps`
         
         const issue = context.issue();
         await context.octokit.issues.createComment({
