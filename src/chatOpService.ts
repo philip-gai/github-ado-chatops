@@ -1,3 +1,4 @@
+import { CommentExpandOptions } from "azure-devops-node-api/interfaces/CommentsInterfaces";
 import { Probot, Context } from "probot";
 import { TextEncoder } from "util";
 import { AzureDevOpsClient } from "./azureDevOpsClient";
@@ -5,13 +6,11 @@ import { AzureDevOpsClient } from "./azureDevOpsClient";
 export class ChatOpService {
     private static createBranchChatOpCommands = ['/create-branch-ado', '/cb-ado']
 
-    private static containsChatOpCommand(comment: string, chatOps: string[]) {
-        return chatOps.includes(comment.trim());
-    }
-
     private _adoClient: AzureDevOpsClient;
 
     private _app: Probot;
+
+    private static usernameParameter = 'username';
 
     // Maximum number of bytes in a git branch is 250
     // Therefore, trim branch name to 62 characters (assuming 32-bit/4-byte Unicode) => 238 bytes
@@ -23,6 +22,10 @@ export class ChatOpService {
         this._app = app;
     }
 
+    private static containsChatOpCommand(comment: string, chatOps: string[]) {
+        return chatOps.includes(comment.trim());
+    }
+
     async tryCreateBranch(comment: string, context: Context<any>): Promise<boolean> {
         // Check if the comment contains any createBranchChatCommands
         this._app.log.info(comment.trim());
@@ -30,8 +33,16 @@ export class ChatOpService {
             this._app.log.info(`Comment ${context.payload.comment.url} does not contain createBranchChatOps`)
             return false;
         }
+
+        let username = context.payload.comment.username;
+        // Check for username parameter
+        if (comment.includes(ChatOpService.usernameParameter))
+        {
+            username = this.parseUsernameParameter(comment);
+        }
+
         // 2. If so, build the branch name from the issue title
-        const branchName = this.createBranchName(context.payload.issue.number, context.payload.issue.title);
+        const branchName = this.createBranchName(username, context.payload.issue.number, context.payload.issue.title);
         
         // 3. Create the branch in ADO
         this._adoClient.createBranch(branchName);
@@ -50,15 +61,13 @@ export class ChatOpService {
         return true;
     }
 
-    createBranchName(issueNum: string, issueTitle :string): string {
+    createBranchName(username: string, issueNum: string, issueTitle :string): string {
 
-        let returnString = issueNum + '-' + issueTitle;
-        const gitSafeString = this.makeGitSafe(returnString);
+        let branchString = issueNum + '-' + issueTitle;
 
-        // TODO: implement user specific parameter for user path 
-        returnString = 'users/mspletz/' + gitSafeString;
+        branchString = `users/${this.makeGitSafe(username)}/${this.makeGitSafe(branchString)}`;
         
-        return returnString.substr(0, this.maxNumOfChars);
+        return branchString.substr(0, this.maxNumOfChars);
     }
 
     makeGitSafe (s: string ) :string {
@@ -68,4 +77,17 @@ export class ChatOpService {
    
         return result;
       }
+
+    parseUsernameParameter(comment: string) : string {
+    let commentArr = comment.trim().split(' ');
+    let usernameIdx = commentArr.findIndex(x => x == ChatOpService.usernameParameter);
+    // Check we're still in bounds
+    if ((usernameIdx+1) < commentArr.length) 
+    {
+        return commentArr[usernameIdx+1];
+    }
+    // throw error?
+    return '';
+        
+    }
 }

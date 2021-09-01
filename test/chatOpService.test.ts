@@ -12,43 +12,53 @@ describe("Chat Op Service", () => {
   const chatOpService = new ChatOpService(probot, adoClient);
 
   test("make sure branch name doesn't include [ or ]", async () => {
-    const branchName = await chatOpService.createBranchName('1234','[ADO] This is an issue');
-    expect(branchName).toBe('users/mspletz/1234--ADO-This-is-an-issue');
+    const branchName = await chatOpService.createBranchName('jdoe', '1234','[ADO] This is an issue');
+    expect(branchName).toBe('users/jdoe/1234--ADO-This-is-an-issue');
   });
 
   test("make sure branch name doesn't include :", async () => {
-    const branchName = await chatOpService.createBranchName('1234','ADO: This is an issue');
-    expect(branchName).toBe('users/mspletz/1234-ADO-This-is-an-issue');
+    const branchName = await chatOpService.createBranchName('jdoe','1234','ADO: This is an issue');
+    expect(branchName).toBe('users/jdoe/1234-ADO-This-is-an-issue');
   });
 
   test("make sure branch name doesn't include ~", async () => {
-    const branchName = await chatOpService.createBranchName('1234','ADO~ This is an issue');
-    expect(branchName).toBe('users/mspletz/1234-ADO-This-is-an-issue');
+    const branchName = await chatOpService.createBranchName('jdoe','1234','ADO~ This is an issue');
+    expect(branchName).toBe('users/jdoe/1234-ADO-This-is-an-issue');
   });
 
   test("make sure branch name doesn't include ^", async () => {
-    const branchName = await chatOpService.createBranchName('1234','ADO^ This is an issue');
-    expect(branchName).toBe('users/mspletz/1234-ADO-This-is-an-issue');
+    const branchName = await chatOpService.createBranchName('jdoe','1234','ADO^ This is an issue');
+    expect(branchName).toBe('users/jdoe/1234-ADO-This-is-an-issue');
   });
 
   test("make sure branch name doesn't include ?", async () => {
-    const branchName = await chatOpService.createBranchName('1234','ADO? This is an issue');
-    expect(branchName).toBe('users/mspletz/1234-ADO-This-is-an-issue');
+    const branchName = await chatOpService.createBranchName('jdoe','1234','ADO? This is an issue');
+    expect(branchName).toBe('users/jdoe/1234-ADO-This-is-an-issue');
   });
 
   test("make sure branch name doesn't include *", async () => {
-    const branchName = await chatOpService.createBranchName('1234','ADO* This is an issue');
-    expect(branchName).toBe('users/mspletz/1234-ADO-This-is-an-issue');
+    const branchName = await chatOpService.createBranchName('jdoe','1234','ADO* This is an issue');
+    expect(branchName).toBe('users/jdoe/1234-ADO-This-is-an-issue');
   });
 
   test("make sure branch name doesn't include '\'", async () => {
-    const branchName = await chatOpService.createBranchName('1234','ADO\ This is an issue');
-    expect(branchName).toBe('users/mspletz/1234-ADO-This-is-an-issue');
+    const branchName = await chatOpService.createBranchName('jdoe','1234','ADO\ This is an issue');
+    expect(branchName).toBe('users/jdoe/1234-ADO-This-is-an-issue');
   });
 
   test("make sure branch name doesn't exceed 62 chars", async () => {
-    const branchName = await chatOpService.createBranchName('1234','ADO: This is an issue that has a very long description that will take up a lot of bytes');
+    const branchName = await chatOpService.createBranchName('jdoe','1234','ADO: This is an issue that has a very long description that will take up a lot of bytes');
     expect(branchName.length).toBe(chatOpService.maxNumOfChars);
+  });
+
+  test("testing username parsing with /create-branch-ado", async () => {
+    const username = chatOpService.parseUsernameParameter('/create-branch-ado username jdoe');
+    expect(username).toBe('jdoe');
+  });
+
+  test("testing username parsing with no username provided", async () => {
+    const username = chatOpService.parseUsernameParameter('/create-branch-ado username');
+    expect(username).toBe('');
   });
 
 });
