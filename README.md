@@ -20,6 +20,12 @@ docker build -t github-ado-chatops .
 
 # 2. Start container
 docker run --env-file .env github-ado-chatops
+
+
+# Build/Deploy for Azure
+docker login githubadochatops.azurecr.io --username githubadochatops
+docker build -t githubadochatops.azurecr.io/github-ado-chatops:latest .
+docker push githubadochatops.azurecr.io/github-ado-chatops:latest
 ```
 ## Usage
 
