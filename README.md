@@ -19,7 +19,7 @@ npm start
 docker build -t github-ado-chatops .
 
 # 2. Start container
-docker run -e APP_ID=<app-id> -e PRIVATE_KEY=<pem-value> github-ado-chatops
+docker run --env-file .env github-ado-chatops
 ```
 ## Usage
 

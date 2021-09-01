@@ -15,11 +15,12 @@ export class AzureDevOpsClient {
         this._app = app;
 
         const orgUrl = `https://${config.instance}/${config.organization}`;
-        const authHandler = azdev.getPersonalAccessTokenHandler(config.pat); 
+        const authHandler = azdev.getPersonalAccessTokenHandler(config.pat);
         this._connection = new azdev.WebApi(orgUrl, authHandler);
     }
 
     async createBranch(branchName: string, sourceBranch: string) {
+        console.log(sourceBranch);
         const gitClient = await this._connection.getGitApi();
         const repo = await this.getRepo(gitClient);
         const defaultBranch = this.getDefaultBranch(repo);
@@ -46,7 +47,7 @@ export class AzureDevOpsClient {
         );
         const refDeleteResult = updateResults[0];
 
-        return refDeleteResult;    
+        return refDeleteResult;
     }
 
     getBranchUrl(branchName: string) {
