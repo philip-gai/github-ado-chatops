@@ -61,4 +61,9 @@ describe("Chat Op Service", () => {
     expect(username).toBe('');
   });
 
+  test("testing username parsing with non gitsafe username", async () => {
+    const branchName = await chatOpService.createBranchName('j?d*e','1234','ADO\ This is an issue');
+    expect(branchName).toBe('users/j-d-e/1234-ADO-This-is-an-issue');
+  });
+
 });
