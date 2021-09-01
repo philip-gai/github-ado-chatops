@@ -9,7 +9,7 @@ export = (app: Probot) => {
   const config = new Config();
   const adoClient = new AzureDevOpsClient(app, config.ado);
   const chatOpService = new ChatOpService(app, adoClient);
-  
+
   // Create handlers and register event listeners
   new IssueCommentHandler(chatOpService).registerEventListeners(app);
 };

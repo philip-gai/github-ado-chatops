@@ -1,9 +1,9 @@
 export class Config {
     readonly ado: ADOConfig = {
-        instance:  Config.getEnv('ADO_INSTANCE'),
+        instance: Config.getEnv('ADO_INSTANCE'),
         organization: Config.getEnv('ADO_ORG'),
         project: Config.getEnv('ADO_PROJECT'),
-        repository:  Config.getEnv('ADO_REPO'),
+        repository: Config.getEnv('ADO_REPO'),
         pat: Config.getEnv('ADO_PAT'),
     }
 

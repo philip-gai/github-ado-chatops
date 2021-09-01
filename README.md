@@ -27,9 +27,10 @@ docker login githubadochatops.azurecr.io --username githubadochatops
 docker build -t githubadochatops.azurecr.io/github-ado-chatops:latest .
 docker push githubadochatops.azurecr.io/github-ado-chatops:latest
 ```
+
 ## Usage
 
-`/create-branch-ado` or `/cb-ado` without any argument will create a branch with the naming scheme `users/<github handle>/<issue number>-<issue title>` off of default branch `main`.
+`/create-branch-ado` or `/cb-ado` without any argument will create a branch with the naming scheme `users/<github handle>/<issue number>-<issue title>` off of the default branch set in your ADO Repo.
 
 Additional parameters can be passed to customize the branch:
 
@@ -45,6 +46,13 @@ would create the the following branch name:
 
 ```sh
 users/jdoe/<issue number>-<issue title>
+```
+
+### Branch
+
+If you want to branch off of a specific branch:
+```
+/cb-ado branch <branchname>
 ```
 
 ## Contributing
