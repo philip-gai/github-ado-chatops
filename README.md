@@ -12,7 +12,7 @@ npm install
 npm start
 ```
 
-## Docker
+## Docker (Optional)
 
 ```sh
 # 1. Build container
