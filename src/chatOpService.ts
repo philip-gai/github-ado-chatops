@@ -63,7 +63,7 @@ export class ChatOpService {
         // Create the branch in ADO
         try {
             this._adoClient.createBranch(branchName, sourceBranch)
-        } catch (e) {
+        } catch (e: any) {
             // Create a comment that a failure occured
             const errorMessage = `Branch [${branchName}] was unable to be created in Azure DevOps" ${e}`;
             context.log.error(errorMessage);

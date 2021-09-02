@@ -26,6 +26,7 @@ export class AzureDevOpsClient {
 
     async createBranch(branchName: string, sourceBranch?: string): Promise<GitRefUpdateResult> {
         try {
+            this._context.log.debug('Getting the ADO git API...');
             const gitClient = await this._azDevClient.getGitApi();
             this._context.log.debug('Getting repo...');
             const repo = await this.getRepo(gitClient);
@@ -40,7 +41,7 @@ export class AzureDevOpsClient {
             const result = await this.createBranchInner(gitClient, repo, sourceBranchFinal, branchName);
             return result;
         }
-        catch (error) {
+        catch (error: any) {
             this._context.log.error(`POST to create branch [${branchName}] has failed`);
             throw new Error(`POST to create branch [${branchName}] has failed`);
         }
