@@ -35,7 +35,7 @@ export class ChatOpService {
 
         // Check if the comment contains any createBranchChatCommands
         context.log.debug(comment.trim());
-        if (!ChatOpService.containsChatOpCommand(comment, ChatOpService.createBranchChatOpCommands)) {
+        if (!ChatOpService.containsChatOpCommand(comment.split(' ')[0], ChatOpService.createBranchChatOpCommands)) {
             context.log.debug(`Comment ${context.payload.comment.url} does not contain createBranchChatOps`)
             return false;
         }
