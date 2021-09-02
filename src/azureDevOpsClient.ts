@@ -33,8 +33,8 @@ export class AzureDevOpsClient {
             const repo = await this.getRepo(gitClient);
             this._context.log.debug('Got it.');
 
-            let sourceBranchFinal = sourceBranch;
-            if (!sourceBranchFinal) {
+            let sourceBranchFinal = `heads/${sourceBranch}`;
+            if (!sourceBranch) {
                 this._context.log.debug('Getting the default branch in ADO...');
                 sourceBranchFinal = this.getDefaultBranch(repo);
                 this._context.log.debug('Got it...');
