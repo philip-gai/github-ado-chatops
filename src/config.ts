@@ -1,4 +1,5 @@
 import { Context } from "probot"
+import { env } from "process";
 
 export class Config {
     static defaultAppConfig: IAppConfig = {
@@ -25,7 +26,7 @@ export class Config {
             throw new Error(errorStr);
         }
         if (config.ado_pat_secret_name) {
-            config.ado_pat = await this.getSecret(config.ado_pat_secret_name, config.ado_org, config.ado_repo, context);
+            config.ado_pat = await Config.getSecret(/*config.ado_pat_secret_name, config.ado_org, config.ado_repo, context*/);
             if (!config.ado_pat) {
                 context.log.error(`No repo secret named ${config.ado_pat_secret_name} was found`);
                 throw new Error(`No repo secret named ${config.ado_pat_secret_name} was found`);
@@ -72,14 +73,15 @@ export class Config {
         }
     }
 
-    private static async getSecret(secretName: string, org: string, repo: string, context: Context<any>): Promise<string> {
-        const response = await context.octokit.rest.actions.getRepoSecret({
-            owner: org,
-            repo: repo,
-            secret_name: secretName
-        });
-        context.log.debug(JSON.stringify(response)); // MAKE SURE TO REMOVE THIS
-        return response.data.name;
+    // NOTE: This is misleading - this does not get the secret value at any point
+    private static async getSecret(/*secretName: string, org: string, repo: string, context: Context<any>*/): Promise<string> {
+        // const response = await context.octokit.rest.actions.getRepoSecret({
+        //     owner: org,
+        //     repo: repo,
+        //     secret_name: secretName
+        // });
+        // return response.data.name;
+        return env.ADO_PAT || '';
     }
 }
 
