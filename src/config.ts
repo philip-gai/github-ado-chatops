@@ -16,14 +16,15 @@ export class Config {
         const config = this.mergeDefaults(loadedConfig);
         const errorMessages = this.validateConfig(config);
         if (errorMessages.length > 0) {
-            context.log.error(errorMessages.join('\n'));
-            process.exit(1);
+            const errorStr = errorMessages.join('\n');
+            context.log.error(errorStr);
+            throw new Error(errorStr);
         }
         if (config.ado_pat_secret_name) {
             config.ado_pat = await this.getSecret(config.ado_pat_secret_name, config.ado_org, config.ado_repo, context);
             if (!config.ado_pat) {
-                context.log.error(errorMessages.join(`No repo secret named ${config.ado_pat_secret_name} was found`));
-                process.exit(1);
+                context.log.error(`No repo secret named ${config.ado_pat_secret_name} was found`);
+                throw new Error(`No repo secret named ${config.ado_pat_secret_name} was found`);
             }
         }
         this.appConfig = config;
@@ -63,8 +64,8 @@ export class Config {
                 await context.config<IAppConfig>('github-ado-chatops.yaml');
             return loadedConfig || this.appConfig;
         } catch (e: any) {
-            context.log.error(`Exception while parsing app config yaml: ${e.message} `);
-            process.exit(1);
+            context.log.error(`Exception while parsing app config yaml: ${e.message}`);
+            throw new Error(`Exception while parsing app config yaml: ${e.message}`);
         }
     }
 
