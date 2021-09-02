@@ -17,8 +17,9 @@ export class AzureDevOpsClient {
     }
 
     static async build(context: Context<any>): Promise<AzureDevOpsClient> {
-        const appConfig = (await new Config().build(context)).appConfig;
+        const appConfig = (await Config.build(context)).appConfig;
         const orgUrl = `https://${appConfig.ado_instance}/${appConfig.ado_org}`;
+        context.log.debug(`orgUrl: ${orgUrl}`);
         const authHandler = azdev.getPersonalAccessTokenHandler(appConfig.ado_pat);
         const azDevClient = new azdev.WebApi(orgUrl, authHandler);
         return new AzureDevOpsClient(context, appConfig, azDevClient);

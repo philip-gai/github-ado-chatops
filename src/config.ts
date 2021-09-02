@@ -11,10 +11,14 @@ export class Config {
     }
     appConfig: IAppConfig = Config.defaultAppConfig;
 
-    async build(context: Context<any>) {
+    private constructor(appConfig: IAppConfig) {
+        this.appConfig = appConfig;
+    }
+
+    static async build(context: Context<any>) {
         const loadedConfig = await this.loadConfig(context);
-        const config = this.mergeDefaults(loadedConfig);
-        const errorMessages = this.validateConfig(config);
+        const config = Config.mergeDefaults(loadedConfig);
+        const errorMessages = Config.validateConfig(config);
         if (errorMessages.length > 0) {
             const errorStr = errorMessages.join('\n');
             context.log.error(errorStr);
@@ -27,11 +31,10 @@ export class Config {
                 throw new Error(`No repo secret named ${config.ado_pat_secret_name} was found`);
             }
         }
-        this.appConfig = config;
-        return this;
+        return new Config(config);
     }
 
-    private mergeDefaults(loadedConfig: IAppConfig): IAppConfig {
+    private static mergeDefaults(loadedConfig: IAppConfig): IAppConfig {
         return {
             ado_instance: loadedConfig.ado_instance || Config.defaultAppConfig.ado_instance,
             ado_org: loadedConfig.ado_org,
@@ -42,7 +45,7 @@ export class Config {
         };
     }
 
-    private validateConfig(config: IAppConfig | undefined): string[] {
+    private static validateConfig(config: IAppConfig | undefined): string[] {
         let errorMessages: string[] = [];
         if (!config) {
             errorMessages.push('No config was found. Please put a config in your repo under .github/github-ado-chatops.yml');
@@ -57,24 +60,25 @@ export class Config {
         return errorMessages;
     }
 
-    private loadConfig = async (context: Context<any>) => {
+    private static loadConfig = async (context: Context<any>) => {
         try {
             let loadedConfig =
                 await context.config<IAppConfig>('github-ado-chatops.yml') ||
                 await context.config<IAppConfig>('github-ado-chatops.yaml');
-            return loadedConfig || this.appConfig;
+            return loadedConfig || Config.defaultAppConfig;
         } catch (e: any) {
             context.log.error(`Exception while parsing app config yaml: ${e.message}`);
             throw new Error(`Exception while parsing app config yaml: ${e.message}`);
         }
     }
 
-    private async getSecret(secretName: string, org: string, repo: string, context: Context<any>): Promise<string> {
+    private static async getSecret(secretName: string, org: string, repo: string, context: Context<any>): Promise<string> {
         const response = await context.octokit.rest.actions.getRepoSecret({
             owner: org,
             repo: repo,
             secret_name: secretName
         });
+        context.log.debug(JSON.stringify(response)); // MAKE SURE TO REMOVE THIS
         return response.data.name;
     }
 }
