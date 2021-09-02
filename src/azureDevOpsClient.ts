@@ -1,27 +1,32 @@
 import * as azdev from "azure-devops-node-api";
 import { IGitApi } from "azure-devops-node-api/GitApi";
 import { GitRepository, GitRefUpdate, GitRefUpdateResult } from "azure-devops-node-api/interfaces/GitInterfaces";
-import { Probot } from "probot";
-import { ADOConfig } from "./config";
+import { Context } from "probot";
+import { Config, IAppConfig } from "./config";
 
 export class AzureDevOpsClient {
 
-    private _connection: azdev.WebApi;
-    private _config: ADOConfig;
-    private _app: Probot;
+    private _appConfig: IAppConfig = Config.defaultAppConfig;
+    private _context: Context<any>;
+    private _azDevClient: azdev.WebApi;
 
-    constructor(app: Probot, config: ADOConfig) {
-        this._config = config;
-        this._app = app;
+    private constructor(context: Context<any>, appConfig: IAppConfig, azDevClient: azdev.WebApi) {
+        this._context = context;
+        this._appConfig = appConfig;
+        this._azDevClient = azDevClient;
+    }
 
-        const orgUrl = `https://${config.instance}/${config.organization}`;
-        const authHandler = azdev.getPersonalAccessTokenHandler(config.pat);
-        this._connection = new azdev.WebApi(orgUrl, authHandler);
+    static async build(context: Context<any>): Promise<AzureDevOpsClient> {
+        const appConfig = (await new Config().build(context)).appConfig;
+        const orgUrl = `https://${appConfig.ado_instance}/${appConfig.ado_org}`;
+        const authHandler = azdev.getPersonalAccessTokenHandler(appConfig.ado_pat);
+        const azDevClient = new azdev.WebApi(orgUrl, authHandler);
+        return new AzureDevOpsClient(context, appConfig, azDevClient);
     }
 
     async createBranch(branchName: string, sourceBranch?: string): Promise<GitRefUpdateResult> {
         try {
-            const gitClient = await this._connection.getGitApi();
+            const gitClient = await this._azDevClient.getGitApi();
             const repo = await this.getRepo(gitClient);
 
             let sourceBranchFinal = sourceBranch;
@@ -32,13 +37,13 @@ export class AzureDevOpsClient {
             return result;
         }
         catch (error) {
-            this._app.log.error(`POST to create branch [${branchName}] has failed`);
+            this._context.log.error(`POST to create branch [${branchName}] has failed`);
             throw new Error(`POST to create branch [${branchName}] has failed`);
         }
     }
 
     async deleteBranch(refName?: string, refObjectId?: string) {
-        const gitClient = await this._connection.getGitApi();
+        const gitClient = await this._azDevClient.getGitApi();
 
         const gitRefUpdates: GitRefUpdate[] = [
             {
@@ -51,8 +56,8 @@ export class AzureDevOpsClient {
         // create a new branch from the source
         const updateResults = await gitClient.updateRefs(
             gitRefUpdates,
-            this._config.repository,
-            this._config.project
+            this._appConfig.ado_repo,
+            this._appConfig.ado_project
         );
         const refDeleteResult = updateResults[0];
 
@@ -61,11 +66,11 @@ export class AzureDevOpsClient {
 
     getBranchUrl(branchName: string) {
         const uriEncodedBranchName = encodeURIComponent(branchName);
-        return `https://${this._config.instance}/${this._config.organization}/${this._config.project}/_git/${this._config.repository}?version=GB${uriEncodedBranchName}`;
+        return `https://${this._appConfig.ado_instance}/${this._appConfig.ado_org}/${this._appConfig.ado_project}/_git/${this._appConfig.ado_repo}?version=GB${uriEncodedBranchName}`;
     }
 
     private async createBranchInner(gitClient: IGitApi, repo: GitRepository, sourceBranch: string, branchName: string) {
-        const gitRefs = await gitClient.getRefs(repo.id as string, this._config.project, sourceBranch);
+        const gitRefs = await gitClient.getRefs(repo.id as string, this._appConfig.ado_project, sourceBranch);
         const sourceRef = gitRefs[0];
 
         const gitRefUpdates: GitRefUpdate[] = [
@@ -79,13 +84,13 @@ export class AzureDevOpsClient {
         // create a new branch from the source
         const updateResults = await gitClient.updateRefs(
             gitRefUpdates,
-            this._config.repository,
-            this._config.project
+            this._appConfig.ado_repo,
+            this._appConfig.ado_project
         );
         const refCreateResult = updateResults[0];
 
-        this._app?.log.info(`project ${this._config.project}, repo ${repo.name}, source branch ${sourceRef.name}`);
-        this._app?.log.info(`new branch ${refCreateResult.name} (success=${refCreateResult.success} status=${refCreateResult.updateStatus})`);
+        this._context.log.info(`project ${this._appConfig.ado_project}, repo ${repo.name}, source branch ${sourceRef.name}`);
+        this._context.log.info(`new branch ${refCreateResult.name} (success=${refCreateResult.success} status=${refCreateResult.updateStatus})`);
 
         return refCreateResult;
     }
@@ -100,10 +105,10 @@ export class AzureDevOpsClient {
     }
 
     private async getRepo(gitClient: IGitApi) {
-        const repo = await gitClient.getRepository(this._config.repository, this._config.project);
+        const repo = await gitClient.getRepository(this._appConfig.ado_repo, this._appConfig.ado_project);
         if (!repo.id) {
-            console.error(`Repo ${this._config.repository} does not exist in project ${this._config.project}`);
-            throw new Error(`Repo ${this._config.repository} does not exist in project ${this._config.project}`);
+            console.error(`Repo ${this._appConfig.ado_repo} does not exist in project ${this._appConfig.ado_project}`);
+            throw new Error(`Repo ${this._appConfig.ado_repo} does not exist in project ${this._appConfig.ado_project}`);
         }
         return repo;
     }

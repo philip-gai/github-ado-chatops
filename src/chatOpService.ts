@@ -1,12 +1,11 @@
-import { Probot, Context } from "probot";
+import { Context } from "probot";
 import { AzureDevOpsClient } from "./azureDevOpsClient";
+import { EventPayloads } from "@octokit/webhooks"
 
 export class ChatOpService {
     private static createBranchChatOpCommands = ['/create-branch-ado', '/cb-ado']
 
     private _adoClient: AzureDevOpsClient;
-
-    private _app: Probot;
 
     private static usernameParameter = 'username';
 
@@ -18,26 +17,31 @@ export class ChatOpService {
     maxNumOfChars = 62;
     static sourceBranch: string;
 
-    constructor(app: Probot, adoClient: AzureDevOpsClient) {
+    private constructor(adoClient: AzureDevOpsClient) {
         this._adoClient = adoClient;
-        this._app = app;
+    }
+
+    static async build(context: Context<any>): Promise<ChatOpService> {
+        const adoClient = await AzureDevOpsClient.build(context);
+        return new ChatOpService(adoClient);
     }
 
     private static containsChatOpCommand(comment: string, chatOps: string[]) {
         return chatOps.includes(comment.trim());
     }
 
-    async tryCreateBranch(comment: string, context: Context<any>): Promise<boolean> {
+    async tryCreateBranch(context: Context<EventPayloads.WebhookPayloadIssueComment>): Promise<boolean> {
+        const comment = context.payload.comment.body;
+
         // Check if the comment contains any createBranchChatCommands
-        this._app.log.debug(comment.trim());
+        context.log.debug(comment.trim());
         if (!ChatOpService.containsChatOpCommand(comment, ChatOpService.createBranchChatOpCommands)) {
-            this._app.log.debug(`Comment ${context.payload.comment.url} does not contain createBranchChatOps`)
+            context.log.debug(`Comment ${context.payload.comment.url} does not contain createBranchChatOps`)
             return false;
         }
 
-        let username: string = context.payload.comment.user.login;
-        this._app.log.debug(`username: ${username}`);
-
+        let username = context.payload.comment.user.login;
+        context.log.debug(`username: ${username}`);
 
         // Check for username parameter
         if (comment.includes(ChatOpService.usernameParameter)) {
@@ -45,14 +49,14 @@ export class ChatOpService {
         }
 
         // Check for branch parameter
-        let sourceBranch: string|undefined;
+        let sourceBranch: string | undefined;
         if (comment.includes(ChatOpService.branchParameter)) {
             sourceBranch = this.parseParameter(comment, ChatOpService.branchParameter);
         }
 
         // Build the branch name from the issue title
         const branchName = this.createBranchName(username, context.payload.issue.number, context.payload.issue.title);
-        this._app.log.info(`built branch name string: ${branchName}`);
+        context.log.info(`built branch name string: ${branchName}`);
 
         const issue = context.issue();
 
@@ -62,7 +66,7 @@ export class ChatOpService {
         } catch (e) {
             // Create a comment that a failure occured
             const errorMessage = `Branch [${branchName}] was unable to be created in Azure DevOps" ${e}`;
-            this._app.log.error(errorMessage);
+            context.log.error(errorMessage);
 
             await context.octokit.issues.createComment({
                 issue_number: issue.issue_number as number,
@@ -86,7 +90,7 @@ export class ChatOpService {
         return true;
     }
 
-    createBranchName(username: string, issueNum: string, issueTitle: string): string {
+    createBranchName(username: string, issueNum: number, issueTitle: string): string {
         let branchString = issueNum + '-' + issueTitle;
 
         branchString = `users/${this.makeGitSafe(username)}/${this.makeGitSafe(branchString)}`;
