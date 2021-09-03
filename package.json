@@ -1,8 +1,16 @@
 {
-  "name": "typescript-action",
-  "version": "0.0.0",
+  "name": "github-ado-chatops",
+  "version": "1.0.0",
   "private": true,
-  "description": "TypeScript template action",
+  "description": "Integrates GitHub with Azure DevOps via ChatOps",
+  "author": "Philip Gai <philip-gai@github.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/philip-gai/github-ado-chatops",
+  "keywords": [
+    "probot",
+    "github",
+    "probot-app"
+  ],
   "main": "lib/main.js",
   "scripts": {
     "build": "tsc",
@@ -15,17 +23,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/actions/typescript-action.git"
+    "url": "git+https://github.com/philip-gai/github-ado-chatops.git"
   },
-  "keywords": [
-    "actions",
-    "node",
-    "setup"
-  ],
-  "author": "",
-  "license": "MIT",
   "dependencies": {
-    "@actions/core": "^1.4.0"
+    "@actions/core": "^1.4.0",
+    "@actions/github": "^5.0.0",
+    "@octokit/rest": "^18.10.0",
+    "azure-devops-node-api": "^11.0.1"
   },
   "devDependencies": {
     "@types/node": "^16.3.3",
