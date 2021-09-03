@@ -1,11 +1,23 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: "GitHub <> Azure DevOps ChatOps"
+description: "Integrates GitHub with Azure DevOps (ADO) via ChatOps. Example: Create a branch in an Azure Repo directly from a GitHub Issue using /cb-ado."
+author: "philip-gai"
 inputs:
-  milliseconds: # change this
+  ado_domain:
+    description: "The domain your ADO instance is in"
     required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+    default: "dev.azure.com"
+  ado_org:
+    description: "The organization that your ADO repository is in"
+    required: true
+  ado_project:
+    description: "The project that your ADO repository is in"
+    required: true
+  ado_repo:
+    description: "The name of your ADO repository"
+    required: true
+  ado_pat:
+    description: "The Personal Access Token (PAT) to use when authenticating with Azure DevOps. Use a repository secret here!"
+    required: true
 runs:
-  using: 'node12'
-  main: 'dist/index.js'
+  using: "node12"
+  main: "dist/index.js"
