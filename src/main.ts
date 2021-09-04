@@ -36,6 +36,7 @@ async function run(): Promise<void> {
         const comment = issueCommentPayload.comment.body;
         core.info(`Comment: ${comment}`);
         const chatOpCommand = getChatOpCommand(chatOpService, comment);
+        if (chatOpCommand === 'None') return core.info('Done.');
         const params = getParameters(chatOpService, chatOpCommand, comment);
         resultMessage = await azureDevOpsService.createBranch({
           issueNumber: issueCommentPayload.issue.number,
@@ -60,11 +61,6 @@ async function run(): Promise<void> {
 function getChatOpCommand(chatOpService: ChatOpService, comment: string): ChatOpCommand {
   core.info('Checking for ChatOp command...');
   const chatOpCommand = chatOpService.getChatOpCommand(comment);
-  if (chatOpCommand === 'None') {
-    const error = 'No ChatOp was found';
-    core.error(error);
-    throw new Error(error);
-  }
   core.info(`Found ChatOp: ${chatOpCommand}`);
   return chatOpCommand;
 }
