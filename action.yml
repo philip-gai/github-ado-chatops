@@ -18,6 +18,9 @@ inputs:
   ado_pat:
     description: "The Personal Access Token (PAT) to use when authenticating with Azure DevOps. Use a repository secret here!"
     required: true
+  github_token:
+    description: "The GitHub Token to use for accessing your repos and stuff. Usually ${{ secrets.GITHUB_TOKEN }}"
+    required: true
 runs:
   using: "node12"
   main: "dist/index.js"
