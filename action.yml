@@ -1,5 +1,5 @@
 name: "GitHub <> Azure DevOps ChatOps"
-description: "Integrates GitHub with Azure DevOps (ADO) via ChatOps. Example: Create a branch in an Azure Repo directly from a GitHub Issue using /cb-ado."
+description: "Integrate GitHub with Azure DevOps via ChatOps"
 author: "philip-gai"
 inputs:
   ado_domain:
