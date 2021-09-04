@@ -1,10 +1,11 @@
 import * as core from '@actions/core';
-import * as github from '@actions/github';
+import { context } from '@actions/github/lib/utils';
 import { ChatOpService } from './chatOpService';
 
 async function run(): Promise<void> {
+  core.info('Running GitHub <> ADO ChatOps...');
   try {
-    const context = github.context;
+    core.info(`Event: ${context.eventName}`);
 
     if (context.eventName === 'issue_comment.created') {
       const chatOpService = await ChatOpService.build(context);
