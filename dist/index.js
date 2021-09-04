@@ -1,6 +1,25 @@
 require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
+/***/ 4275:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.chatOps = exports.chatOpInfo = void 0;
+const createBranchChatOpInfo = {
+    commands: ['/cb-ado', '/create-branch-ado'],
+    params: ['-branch', '-username']
+};
+const chatOpInfo = [createBranchChatOpInfo];
+exports.chatOpInfo = chatOpInfo;
+const chatOps = createBranchChatOpInfo.commands;
+exports.chatOps = chatOps;
+
+
+/***/ }),
+
 /***/ 7743:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -38,44 +57,43 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AzureDevOpsClient = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const azdev = __importStar(__nccwpck_require__(7967));
-const config_1 = __nccwpck_require__(88);
+const configService_1 = __nccwpck_require__(5460);
 class AzureDevOpsClient {
-    constructor(context, appConfig, azDevClient) {
-        this._appConfig = config_1.Config.defaultAppConfig;
-        this._context = context;
+    constructor(appConfig, azDevClient) {
+        this._appConfig = configService_1.ConfigService.defaultAppConfig;
         this._appConfig = appConfig;
         this._azDevClient = azDevClient;
     }
-    static build(context) {
+    static build(configService) {
         return __awaiter(this, void 0, void 0, function* () {
-            const appConfig = (yield config_1.Config.build()).appConfig;
+            const appConfig = configService.appConfig;
             const orgUrl = `https://${appConfig.ado_domain}/${appConfig.ado_org}`;
-            core.debug(`orgUrl: ${orgUrl}`);
             const authHandler = azdev.getPersonalAccessTokenHandler(appConfig.ado_pat);
             const azDevClient = new azdev.WebApi(orgUrl, authHandler);
-            return new AzureDevOpsClient(context, appConfig, azDevClient);
+            return new AzureDevOpsClient(appConfig, azDevClient);
         });
     }
-    createBranch(branchName, sourceBranch) {
+    createBranch(branchName, options) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                core.debug('Getting the ADO git API...');
+                core.info('Getting the ADO git API...');
                 const gitClient = yield this._azDevClient.getGitApi();
-                core.debug('Getting repo...');
+                core.info('Got it.');
+                core.info('Getting the repo...');
                 const repo = yield this.getRepo(gitClient);
-                core.debug('Got it.');
-                let sourceBranchFinal = sourceBranch;
-                if (!sourceBranchFinal) {
-                    core.debug('Getting the default branch in ADO...');
-                    sourceBranchFinal = this.getDefaultBranch(repo);
-                    core.debug('Got it...');
+                core.info('Got it.');
+                let sourceBranch = options.sourceBranch;
+                if (!sourceBranch) {
+                    core.info('Getting the default branch in ADO...');
+                    sourceBranch = this.getDefaultBranch(repo);
+                    core.info('Got it.');
                 }
-                const result = yield this.createBranchInner(gitClient, repo, sourceBranchFinal, branchName);
+                const result = yield this.createBranchInner(branchName, options, gitClient, repo);
                 return result;
             }
             catch (error) {
-                core.error(`POST to create branch [${branchName}] has failed`);
-                throw new Error(`POST to create branch [${branchName}] has failed`);
+                core.error(`Failed to create branch: ${branchName}`);
+                throw new Error(`Failed to create branch: ${branchName}`);
             }
         });
     }
@@ -95,15 +113,11 @@ class AzureDevOpsClient {
             return refDeleteResult;
         });
     }
-    getBranchUrl(branchName) {
-        const uriEncodedBranchName = encodeURIComponent(branchName);
-        return `https://${this._appConfig.ado_domain}/${this._appConfig.ado_org}/${this._appConfig.ado_project}/_git/${this._appConfig.ado_repo}?version=GB${uriEncodedBranchName}`;
-    }
-    createBranchInner(gitClient, repo, sourceBranch, branchName) {
+    createBranchInner(branchName, options, gitClient, repo) {
         return __awaiter(this, void 0, void 0, function* () {
-            core.debug(`Creating branch from ${sourceBranch}.`);
-            core.debug(`Getting ${sourceBranch} refs...`);
-            const gitRefs = yield gitClient.getRefs(repo.id, this._appConfig.ado_project, sourceBranch);
+            core.debug(`Creating branch from ${options.sourceBranch}.`);
+            core.debug(`Getting ${options.sourceBranch} refs...`);
+            const gitRefs = yield gitClient.getRefs(repo.id, this._appConfig.ado_project, options.sourceBranch);
             const sourceRef = gitRefs[0];
             core.debug("Got 'em.");
             const gitRefUpdates = [
@@ -114,11 +128,9 @@ class AzureDevOpsClient {
                 }
             ];
             // create a new branch from the source
-            core.debug('Creating the branch...');
+            core.debug('Creating the new branch...');
             const updateResults = yield gitClient.updateRefs(gitRefUpdates, this._appConfig.ado_repo, this._appConfig.ado_project);
             const refCreateResult = updateResults[0];
-            core.info(`project ${this._appConfig.ado_project}, repo ${repo.name}, source branch ${sourceRef.name}`);
-            core.info(`new branch ${refCreateResult.name} (success=${refCreateResult.success} status=${refCreateResult.updateStatus})`);
             return refCreateResult;
         });
     }
@@ -147,7 +159,7 @@ exports.AzureDevOpsClient = AzureDevOpsClient;
 
 /***/ }),
 
-/***/ 2842:
+/***/ 5054:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -181,86 +193,52 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.ChatOpService = void 0;
+exports.AzureDevOpsService = void 0;
 const core = __importStar(__nccwpck_require__(2186));
-const github = __importStar(__nccwpck_require__(5438));
 const azureDevOpsClient_1 = __nccwpck_require__(7743);
-class ChatOpService {
-    constructor(octokit, adoClient) {
+class AzureDevOpsService {
+    constructor(appConfig, adoClient) {
         // Maximum number of bytes in a git branch is 250
         // Therefore, trim branch name to 62 characters (assuming 32-bit/4-byte Unicode) => 238 bytes
         // (https://stackoverflow.com/questions/60045157/what-is-the-maximum-length-of-a-github-branch-name)
         this.maxNumOfChars = 62;
-        this._octokit = octokit;
+        this._appConfig = appConfig;
         this._adoClient = adoClient;
     }
-    static build(context) {
+    static build(configService) {
         return __awaiter(this, void 0, void 0, function* () {
-            const adoClient = yield azureDevOpsClient_1.AzureDevOpsClient.build(context);
-            const githubToken = core.getInput('GITHUB_TOKEN');
-            const octokit = github.getOctokit(githubToken);
-            return new ChatOpService(octokit, adoClient);
+            const appConfig = configService.appConfig;
+            const adoClient = yield azureDevOpsClient_1.AzureDevOpsClient.build(configService);
+            return new AzureDevOpsService(appConfig, adoClient);
         });
     }
-    static containsChatOpCommand(comment, chatOps) {
-        return chatOps.includes(comment.trim());
-    }
-    tryCreateBranch(context) {
-        var _a, _b, _c, _d, _e;
+    createBranch(options) {
         return __awaiter(this, void 0, void 0, function* () {
-            const comment = (_a = context.payload.comment) === null || _a === void 0 ? void 0 : _a.body;
-            // Check if the comment contains any createBranchChatCommands
-            core.debug(comment.trim());
-            if (!ChatOpService.containsChatOpCommand(comment.split(' ')[0], ChatOpService.createBranchChatOpCommands)) {
-                core.debug(`Comment ${(_b = context.payload.comment) === null || _b === void 0 ? void 0 : _b.url} does not contain createBranchChatOps`);
-                return false;
-            }
-            let username = (_c = context.payload.comment) === null || _c === void 0 ? void 0 : _c.user.login;
-            core.debug(`username: ${username}`);
-            // Check for username parameter
-            if (comment.includes(ChatOpService.usernameParameter)) {
-                username = this.parseParameter(comment, ChatOpService.usernameParameter);
-            }
-            // Check for branch parameter
-            let sourceBranch;
-            if (comment.includes(ChatOpService.branchParameter)) {
-                sourceBranch = this.parseParameter(comment, ChatOpService.branchParameter);
-            }
-            // Build the branch name from the issue title
-            const branchName = this.createBranchName(username, ((_d = context.payload.issue) === null || _d === void 0 ? void 0 : _d.number) || -1, (_e = context.payload.issue) === null || _e === void 0 ? void 0 : _e.title);
-            core.info(`built branch name string: ${branchName}`);
-            const issue = context.issue;
-            // Create the branch in ADO
             try {
-                this._adoClient.createBranch(branchName, sourceBranch);
+                // Build the branch name from the issue title
+                core.info('Building branch name...');
+                const branchName = this.buildBranchName(options);
+                core.info(`Branch name: ${branchName}`);
+                this._adoClient.createBranch(branchName, options);
+                // Create a comment with a link to the newly created branch
+                const successMessage = `Branch [${branchName}](${this.getBranchUrl(branchName)}) has been created in Azure DevOps`;
+                return successMessage;
             }
             catch (e) {
-                // Create a comment that a failure occured
-                const errorMessage = `Branch [${branchName}] was unable to be created in Azure DevOps" ${e}`;
+                const errorMessage = `Failed creating the branch in ADO: ${e}`;
                 core.error(errorMessage);
-                yield this._octokit.issues.createComment({
-                    issue_number: issue.number,
-                    owner: issue.owner,
-                    repo: issue.repo,
-                    body: errorMessage
-                });
-                return false;
+                return errorMessage;
             }
-            // Create a comment with a link to the newly created branch
-            const result = `Branch [${branchName}](${this._adoClient.getBranchUrl(branchName)}) has been created in Azure DevOps`;
-            yield this._octokit.rest.issues.createComment({
-                issue_number: issue.number,
-                owner: issue.owner,
-                repo: issue.repo,
-                body: result
-            });
-            return true;
         });
     }
-    createBranchName(username, issueNum, issueTitle) {
-        let branchString = `${issueNum}-${issueTitle}`;
-        branchString = `users/${this.makeGitSafe(username)}/${this.makeGitSafe(branchString)}`;
-        return branchString.substr(0, this.maxNumOfChars);
+    getBranchUrl(branchName) {
+        const uriEncodedBranchName = encodeURIComponent(branchName);
+        return `https://${this._appConfig.ado_domain}/${this._appConfig.ado_org}/${this._appConfig.ado_project}/_git/${this._appConfig.ado_repo}?version=GB${uriEncodedBranchName}`;
+    }
+    buildBranchName(options) {
+        const issueInfo = `${options.issueNumber}-${options.issueTitle.toLowerCase()}`;
+        const branchName = `users/${this.makeGitSafe(options.username)}/${this.makeGitSafe(issueInfo)}`;
+        return branchName.substr(0, this.maxNumOfChars);
     }
     makeGitSafe(s) {
         const replacementChar = '-';
@@ -268,26 +246,61 @@ class ChatOpService {
         const result = s.replace(regexp, replacementChar).replace(/[/]+$/, '');
         return result;
     }
-    parseParameter(comment, parameter) {
-        const commentArr = comment.trim().split(' ');
-        const paramIdx = commentArr.findIndex(x => x === parameter);
-        // Check we're still in bounds
-        if (paramIdx + 1 < commentArr.length) {
-            return commentArr[paramIdx + 1];
-        }
-        // TODO: throw error?
-        return '';
-    }
 }
-exports.ChatOpService = ChatOpService;
-ChatOpService.createBranchChatOpCommands = ['/create-branch-ado', '/cb-ado'];
-ChatOpService.usernameParameter = 'username';
-ChatOpService.branchParameter = 'branch';
+exports.AzureDevOpsService = AzureDevOpsService;
 
 
 /***/ }),
 
-/***/ 88:
+/***/ 2842:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.ChatOpService = void 0;
+const ChatOps_1 = __nccwpck_require__(4275);
+class ChatOpService {
+    constructor() { }
+    static build() {
+        return new ChatOpService();
+    }
+    getChatOpCommand(comment) {
+        const command = this.getCommandString(comment);
+        return ChatOps_1.chatOps.find(op => op === command) || 'None';
+    }
+    getParameterValues(command, comment) {
+        var _a;
+        const possibleParams = ((_a = ChatOps_1.chatOpInfo.find(info => info.commands.includes(command))) === null || _a === void 0 ? void 0 : _a.params) || [];
+        if (possibleParams.length === 0)
+            return {};
+        const paramValueMap = {};
+        for (const pp of possibleParams) {
+            paramValueMap[pp] = this.getParamValue(pp, comment);
+        }
+        return paramValueMap;
+    }
+    getCommandString(comment) {
+        const commentTrim = comment.trim();
+        if (!commentTrim.startsWith('/'))
+            return '';
+        const command = commentTrim.split(' ')[0];
+        return command;
+    }
+    getParamValue(param, comment) {
+        const splitResult = comment.split(param);
+        if (splitResult.length < 2)
+            return '';
+        const theRest = splitResult[1].trim();
+        return theRest.split(' ')[0];
+    }
+}
+exports.ChatOpService = ChatOpService;
+
+
+/***/ }),
+
+/***/ 5460:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -321,29 +334,29 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.Config = void 0;
+exports.ConfigService = void 0;
 const core = __importStar(__nccwpck_require__(2186));
-class Config {
+class ConfigService {
     constructor(appConfig) {
-        this.appConfig = Config.defaultAppConfig;
+        this.appConfig = ConfigService.defaultAppConfig;
         this.appConfig = appConfig;
     }
     static build() {
         return __awaiter(this, void 0, void 0, function* () {
             const loadedConfig = this.loadConfig();
-            const config = Config.mergeDefaults(loadedConfig);
-            const errorMessages = Config.validateConfig(config);
+            const config = ConfigService.mergeDefaults(loadedConfig);
+            const errorMessages = ConfigService.validateConfig(config);
             if (errorMessages.length > 0) {
                 const errorStr = errorMessages.join('\n');
                 core.error(errorStr);
                 throw new Error(errorStr);
             }
-            return new Config(config);
+            return new ConfigService(config);
         });
     }
     static mergeDefaults(loadedConfig) {
         return {
-            ado_domain: loadedConfig.ado_domain || Config.defaultAppConfig.ado_domain,
+            ado_domain: loadedConfig.ado_domain || ConfigService.defaultAppConfig.ado_domain,
             ado_org: loadedConfig.ado_org,
             ado_pat: loadedConfig.ado_pat,
             ado_project: loadedConfig.ado_project,
@@ -366,15 +379,15 @@ class Config {
         return errorMessages;
     }
 }
-exports.Config = Config;
-Config.defaultAppConfig = {
+exports.ConfigService = ConfigService;
+ConfigService.defaultAppConfig = {
     ado_domain: 'dev.azure.com',
     ado_org: '',
     ado_pat: '',
     ado_project: '',
     ado_repo: ''
 };
-Config.loadConfig = () => {
+ConfigService.loadConfig = () => {
     const ado_domain = core.getInput('ado_domain');
     const ado_org = core.getInput('ado_org');
     const ado_project = core.getInput('ado_project');
@@ -433,22 +446,71 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
+const github = __importStar(__nccwpck_require__(5438));
 const utils_1 = __nccwpck_require__(3030);
 const chatOpService_1 = __nccwpck_require__(2842);
+const azureDevOpsService_1 = __nccwpck_require__(5054);
+const configService_1 = __nccwpck_require__(5460);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
-        core.info('Running GitHub <> ADO ChatOps...');
         try {
+            core.info('Running GitHub <> ADO ChatOps...');
             core.info(`Event: ${utils_1.context.eventName}`);
-            if (utils_1.context.eventName === 'issue_comment.created') {
-                const chatOpService = yield chatOpService_1.ChatOpService.build(utils_1.context);
-                chatOpService.tryCreateBranch(utils_1.context);
+            core.info(`Action: ${utils_1.context.payload.action || 'Unknown'}`);
+            core.info('Initializaing services...');
+            const githubToken = core.getInput('GITHUB_TOKEN');
+            const octokit = github.getOctokit(githubToken);
+            const configService = yield configService_1.ConfigService.build();
+            const chatOpService = chatOpService_1.ChatOpService.build();
+            const azureDevOpsService = yield azureDevOpsService_1.AzureDevOpsService.build(configService);
+            core.info('Done.');
+            let resultMessage = '';
+            if (utils_1.context.eventName === 'issue_comment') {
+                const issueCommentPayload = utils_1.context.payload;
+                if (issueCommentPayload.action === 'created') {
+                    const comment = issueCommentPayload.comment.body;
+                    core.info(`Comment: ${comment}`);
+                    const chatOpCommand = getChatOpCommand(chatOpService, comment);
+                    const params = getParameters(chatOpService, chatOpCommand, comment);
+                    resultMessage = yield azureDevOpsService.createBranch({
+                        issueNumber: issueCommentPayload.issue.number,
+                        issueTitle: issueCommentPayload.issue.title,
+                        username: params['-username'] || issueCommentPayload.sender.login,
+                        sourceBranch: params['-branch']
+                    });
+                }
             }
+            yield octokit.rest.issues.createComment({
+                owner: utils_1.context.issue.owner,
+                repo: utils_1.context.issue.repo,
+                issue_number: utils_1.context.issue.number,
+                body: resultMessage || 'There was nothing to do!'
+            });
         }
         catch (error) {
-            core.setFailed(error.message);
+            core.setFailed((error === null || error === void 0 ? void 0 : error.message) || error || `An unknown error has occurred: ${error}`);
         }
     });
+}
+function getChatOpCommand(chatOpService, comment) {
+    core.info('Checking for ChatOp command...');
+    const chatOpCommand = chatOpService.getChatOpCommand(comment);
+    if (chatOpCommand === 'None') {
+        const error = 'No ChatOp was found';
+        core.error(error);
+        throw new Error(error);
+    }
+    core.info(`Found ChatOp: ${chatOpCommand}`);
+    return chatOpCommand;
+}
+function getParameters(chatOpService, chatOpCommand, comment) {
+    core.info('Getting parameters...');
+    const paramValues = chatOpService.getParameterValues(chatOpCommand, comment);
+    for (const key of Object.keys(paramValues)) {
+        const value = paramValues[key];
+        core.info(`Found ${key} ${value}`);
+    }
+    return paramValues;
 }
 run();
 

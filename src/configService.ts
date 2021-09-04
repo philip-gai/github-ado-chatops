@@ -1,34 +1,34 @@
 import * as core from '@actions/core';
 
-export class Config {
-  static defaultAppConfig: IAppConfig = {
+export class ConfigService {
+  static defaultAppConfig: AppConfig = {
     ado_domain: 'dev.azure.com',
     ado_org: '',
     ado_pat: '',
     ado_project: '',
     ado_repo: ''
   };
-  appConfig: IAppConfig = Config.defaultAppConfig;
+  appConfig: AppConfig = ConfigService.defaultAppConfig;
 
-  private constructor(appConfig: IAppConfig) {
+  private constructor(appConfig: AppConfig) {
     this.appConfig = appConfig;
   }
 
-  static async build(): Promise<Config> {
+  static async build(): Promise<ConfigService> {
     const loadedConfig = this.loadConfig();
-    const config = Config.mergeDefaults(loadedConfig);
-    const errorMessages = Config.validateConfig(config);
+    const config = ConfigService.mergeDefaults(loadedConfig);
+    const errorMessages = ConfigService.validateConfig(config);
     if (errorMessages.length > 0) {
       const errorStr = errorMessages.join('\n');
       core.error(errorStr);
       throw new Error(errorStr);
     }
-    return new Config(config);
+    return new ConfigService(config);
   }
 
-  private static mergeDefaults(loadedConfig: IAppConfig): IAppConfig {
+  private static mergeDefaults(loadedConfig: AppConfig): AppConfig {
     return {
-      ado_domain: loadedConfig.ado_domain || Config.defaultAppConfig.ado_domain,
+      ado_domain: loadedConfig.ado_domain || ConfigService.defaultAppConfig.ado_domain,
       ado_org: loadedConfig.ado_org,
       ado_pat: loadedConfig.ado_pat,
       ado_project: loadedConfig.ado_project,
@@ -36,7 +36,7 @@ export class Config {
     };
   }
 
-  private static validateConfig(config: IAppConfig): string[] {
+  private static validateConfig(config: AppConfig): string[] {
     const errorMessages: string[] = [];
     // There are better ways to do this but I'm being lazy
     if (!config.ado_domain) errorMessages.push('No ado_org was found. Check your inputs');
@@ -47,7 +47,7 @@ export class Config {
     return errorMessages;
   }
 
-  private static loadConfig = (): IAppConfig => {
+  private static loadConfig = (): AppConfig => {
     const ado_domain = core.getInput('ado_domain');
     const ado_org = core.getInput('ado_org');
     const ado_project = core.getInput('ado_project');
@@ -71,7 +71,7 @@ export class Config {
   };
 }
 
-export interface IAppConfig {
+export interface AppConfig {
   ado_domain: string;
   ado_org: string;
   ado_project: string;
