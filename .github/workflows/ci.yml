@@ -27,3 +27,4 @@ jobs:
           ado_project: github-ado-chatops
           ado_repo: github-ado-chatops
           ado_pat: ${{ secrets.ADO_PAT }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}

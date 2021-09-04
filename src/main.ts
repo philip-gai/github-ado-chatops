@@ -16,9 +16,14 @@ async function run(): Promise<void> {
     core.info(`Action: ${context.payload.action || 'Unknown'}`);
 
     core.info('Initializaing services...');
-    const githubToken = core.getInput('GITHUB_TOKEN');
-    const octokit = github.getOctokit(githubToken) as Octokit;
     const configService = await ConfigService.build();
+
+    // This should be a token with access to your repository scoped in as a secret.
+    // The YML workflow will need to set myToken with the GitHub Secret Token
+    // github_token: ${{ secrets.GITHUB_TOKEN }}
+    // https://help.github.com/en/actions/automating-your-workflow-with-github-actions/authenticating-with-the-github_token#about-the-github_token-secret
+    const octokit = github.getOctokit(configService.appConfig.github_token) as Octokit;
+
     const chatOpService = ChatOpService.build();
     const azureDevOpsService = await AzureDevOpsService.build(configService);
     core.info('Done.');
@@ -38,15 +43,15 @@ async function run(): Promise<void> {
           username: params['-username'] || issueCommentPayload.sender.login,
           sourceBranch: params['-branch']
         });
+        await octokit.rest.issues.createComment({
+          owner: context.issue.owner,
+          repo: context.issue.repo,
+          issue_number: context.issue.number,
+          body: resultMessage || 'There was nothing to do!'
+        });
       }
     }
-
-    await octokit.rest.issues.createComment({
-      owner: context.issue.owner,
-      repo: context.issue.repo,
-      issue_number: context.issue.number,
-      body: resultMessage || 'There was nothing to do!'
-    });
+    core.info(resultMessage);
   } catch (error) {
     core.setFailed(error?.message || error || `An unknown error has occurred: ${error}`);
   }

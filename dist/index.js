@@ -360,7 +360,8 @@ class ConfigService {
             ado_org: loadedConfig.ado_org,
             ado_pat: loadedConfig.ado_pat,
             ado_project: loadedConfig.ado_project,
-            ado_repo: loadedConfig.ado_repo
+            ado_repo: loadedConfig.ado_repo,
+            github_token: loadedConfig.github_token
         };
     }
     static validateConfig(config) {
@@ -376,6 +377,8 @@ class ConfigService {
             errorMessages.push('No ado_project was found. Check your inputs');
         if (!config.ado_repo)
             errorMessages.push('No ado_repo was found. Check your inputs');
+        if (!config.github_token)
+            errorMessages.push('No github_token was found. Check your inputs');
         return errorMessages;
     }
 }
@@ -385,7 +388,8 @@ ConfigService.defaultAppConfig = {
     ado_org: '',
     ado_pat: '',
     ado_project: '',
-    ado_repo: ''
+    ado_repo: '',
+    github_token: ''
 };
 ConfigService.loadConfig = () => {
     const ado_domain = core.getInput('ado_domain');
@@ -393,18 +397,21 @@ ConfigService.loadConfig = () => {
     const ado_project = core.getInput('ado_project');
     const ado_repo = core.getInput('ado_repo');
     const ado_pat = core.getInput('ado_pat');
+    const github_token = core.getInput('github_token');
     // debug is only output if you set the secret `ACTIONS_RUNNER_DEBUG` to true
-    core.debug(`ado_domain: ${ado_domain}!`);
-    core.debug(`ado_org: ${ado_org}!`);
-    core.debug(`ado_project: ${ado_project}!`);
-    core.debug(`ado_repo: ${ado_repo}!`);
-    core.debug(`ado_pat: ${ado_pat}!`);
+    core.info(`ado_domain: ${ado_domain}!`);
+    core.info(`ado_org: ${ado_org}!`);
+    core.info(`ado_project: ${ado_project}!`);
+    core.info(`ado_repo: ${ado_repo}!`);
+    core.info(`ado_pat: ${ado_pat != null ? '*******' : ''}!`);
+    core.info(`github_token: ${github_token != null ? '*******' : ''}!`);
     return {
         ado_domain,
         ado_org,
         ado_project,
         ado_repo,
-        ado_pat
+        ado_pat,
+        github_token
     };
 };
 
@@ -458,9 +465,12 @@ function run() {
             core.info(`Event: ${utils_1.context.eventName}`);
             core.info(`Action: ${utils_1.context.payload.action || 'Unknown'}`);
             core.info('Initializaing services...');
-            const githubToken = core.getInput('GITHUB_TOKEN');
-            const octokit = github.getOctokit(githubToken);
             const configService = yield configService_1.ConfigService.build();
+            // This should be a token with access to your repository scoped in as a secret.
+            // The YML workflow will need to set myToken with the GitHub Secret Token
+            // github_token: ${{ secrets.GITHUB_TOKEN }}
+            // https://help.github.com/en/actions/automating-your-workflow-with-github-actions/authenticating-with-the-github_token#about-the-github_token-secret
+            const octokit = github.getOctokit(configService.appConfig.github_token);
             const chatOpService = chatOpService_1.ChatOpService.build();
             const azureDevOpsService = yield azureDevOpsService_1.AzureDevOpsService.build(configService);
             core.info('Done.');
@@ -478,14 +488,15 @@ function run() {
                         username: params['-username'] || issueCommentPayload.sender.login,
                         sourceBranch: params['-branch']
                     });
+                    yield octokit.rest.issues.createComment({
+                        owner: utils_1.context.issue.owner,
+                        repo: utils_1.context.issue.repo,
+                        issue_number: utils_1.context.issue.number,
+                        body: resultMessage || 'There was nothing to do!'
+                    });
                 }
             }
-            yield octokit.rest.issues.createComment({
-                owner: utils_1.context.issue.owner,
-                repo: utils_1.context.issue.repo,
-                issue_number: utils_1.context.issue.number,
-                body: resultMessage || 'There was nothing to do!'
-            });
+            core.info(resultMessage);
         }
         catch (error) {
             core.setFailed((error === null || error === void 0 ? void 0 : error.message) || error || `An unknown error has occurred: ${error}`);
