@@ -433,15 +433,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
-const github = __importStar(__nccwpck_require__(5438));
+const utils_1 = __nccwpck_require__(3030);
 const chatOpService_1 = __nccwpck_require__(2842);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
+        core.info('Running GitHub <> ADO ChatOps...');
         try {
-            const context = github.context;
-            if (context.eventName === 'issue_comment.created') {
-                const chatOpService = yield chatOpService_1.ChatOpService.build(context);
-                chatOpService.tryCreateBranch(context);
+            core.info(`Event: ${utils_1.context.eventName}`);
+            if (utils_1.context.eventName === 'issue_comment.created') {
+                const chatOpService = yield chatOpService_1.ChatOpService.build(utils_1.context);
+                chatOpService.tryCreateBranch(utils_1.context);
             }
         }
         catch (error) {
