@@ -1,15 +1,18 @@
-name: "Source: Run GitHub <> Azure DevOps ChatOps"
+name: "Run Azure DevOps ChatOps"
 
 on:
   issue_comment:
     types: [created]
+
+permissions:
+  issues: write
 
 jobs:
   run-github-ado-chatops:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: ./
+      - uses: philip-gai/github-ado-chatops
         with:
           ado_org: philip-gai
           ado_project: github-ado-chatops

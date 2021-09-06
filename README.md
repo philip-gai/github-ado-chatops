@@ -1,105 +1,62 @@
-<p align="center">
-  <a href="https://github.com/actions/typescript-action/actions"><img alt="typescript-action status" src="https://github.com/actions/typescript-action/workflows/build-test/badge.svg"></a>
-</p>
+# Azure DevOps ChatOps - GitHub Action
 
-# Create a JavaScript Action using TypeScript
+Integrate GitHub with Azure DevOps via ChatOps! 🚀
 
-Use this template to bootstrap the creation of a TypeScript action.:rocket:
+https://user-images.githubusercontent.com/17363579/132159736-93355b49-f446-427e-a9fc-fb78c6b54938.mov
 
-This template includes compilation support, tests, a validation workflow, publishing, and versioning guidance.  
+## ChatOp Commands
 
-If you are new, there's also a simpler introduction.  See the [Hello World JavaScript Action](https://github.com/actions/hello-world-javascript-action)
+| Command | Aliases | Description | Options | Context |
+| ------------- | ------------- | ------------- | ------------- | ------------- |
+| `/cb-ado`  | `/create-branch-ado` | Creates a branch in Azure DevOps using information from the issue.<br/>Default: `users/{githubUsername}/{issueNumber}-{issueName}-{issueTitle}`. | <ul><li>`-username`: The username to use in your branch name.<br/>Default: GitHub username</li><li>`-branch`: The branch to branch from.<br/>Default: The default branch set in ADO</li></ul> | Issues |
 
-## Create an action from this template
+## Getting Started
 
-Click the `Use this Template` and provide the new repo details for your action
+### Prerequisites
+1. An Azure DevOps account and repository ([Start one for free](https://azure.microsoft.com/en-us/services/devops/))
 
-## Code in Main
-
-> First, you'll need to have a reasonably modern version of `node` handy. This won't work with versions older than 9, for instance.
-
-Install the dependencies  
-```bash
-$ npm install
+### Usage
+1. Create a personal access token (PAT) for your ADO repository ([Use personal access tokens](https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?toc=%2Fazure%2Fdevops%2Forganizations%2Ftoc.json&bc=%2Fazure%2Fdevops%2Forganizations%2Fbreadcrumb%2Ftoc.json&view=azure-devops&tabs=preview-page))
+2. Create an encrypted secret named `ADO_PAT` in your GitHub repository with the ADO PAT token value ([Creating encrypted secrets for a repository](https://docs.github.com/en/actions/reference/encrypted-secrets#creating-encrypted-secrets-for-a-repository)).
+3. Create a workflow file in your GitHub repo with the path `.github/workflows/github-ado-chatops.yml` with the following:
 ```
+name: "Run Azure DevOps ChatOps"
 
-Build the typescript and package it for distribution
-```bash
-$ npm run build && npm run package
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  issues: write
+
+jobs:
+  run-github-ado-chatops:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: philip-gai/github-ado-chatops
+        with:
+          ado_org: philip-gai
+          ado_project: github-ado-chatops
+          ado_repo: github-ado-chatops
+          ado_pat: ${{ secrets.ADO_PAT }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
 ```
+4. You can now use ADO ChatOps in your GitHub repo! 🎉🎉🎉
 
-Run the tests :heavy_check_mark:  
-```bash
-$ npm test
+## Feature Requests and Feedback
+I would love to hear your feedback. Let me know if you've run into any bugs, or have any feature requests.
 
- PASS  ./index.test.js
-  ✓ throws invalid number (3ms)
-  ✓ wait 500 ms (504ms)
-  ✓ test runs (95ms)
+### Feature Requests
+1. [View enhancements and feature requests already in the backlog](https://github.com/philip-gai/github-ado-chatops/issues?q=is%3Aopen+is%3Aissue+label%3A%22feature+request%22%2Cenhancement)
+2. [Create a feature request](https://github.com/philip-gai/github-ado-chatops/issues/new?assignees=&labels=feature+request&template=feature_request.md&title=)
 
-...
-```
+### Bugs
+1. [View known issues](https://github.com/philip-gai/github-ado-chatops/issues?q=is%3Aopen+is%3Aissue+label%3Abug)
+2. [Report a bug](https://github.com/philip-gai/github-ado-chatops/issues/new?assignees=&labels=bug&template=bug_report.md&title=)
 
-## Change action.yml
+### Questions / Conversations
+Do you have any questions? Want to just talk and ask me stuff?
 
-The action.yml contains defines the inputs and output for your action.
-
-Update the action.yml with your name, description, inputs and outputs for your action.
-
-See the [documentation](https://help.github.com/en/articles/metadata-syntax-for-github-actions)
-
-## Change the Code
-
-Most toolkit and CI/CD operations involve async operations so the action is run in an async function.
-
-```javascript
-import * as core from '@actions/core';
-...
-
-async function run() {
-  try { 
-      ...
-  } 
-  catch (error) {
-    core.setFailed(error.message);
-  }
-}
-
-run()
-```
-
-See the [toolkit documentation](https://github.com/actions/toolkit/blob/master/README.md#packages) for the various packages.
-
-## Publish to a distribution branch
-
-Actions are run from GitHub repos so we will checkin the packed dist folder. 
-
-Then run [ncc](https://github.com/zeit/ncc) and push the results:
-```bash
-$ npm run package
-$ git add dist
-$ git commit -a -m "prod dependencies"
-$ git push origin releases/v1
-```
-
-Note: We recommend using the `--license` option for ncc, which will create a license file for all of the production node modules used in your project.
-
-Your action is now published! :rocket: 
-
-See the [versioning documentation](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md)
-
-## Validate
-
-You can now validate the action by referencing `./` in a workflow in your repo (see [test.yml](.github/workflows/test.yml))
-
-```yaml
-uses: ./
-with:
-  milliseconds: 1000
-```
-
-See the [actions tab](https://github.com/actions/typescript-action/actions) for runs of this action! :rocket:
-
-## Usage:
-
-After testing you can [create a v1 tag](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md) to reference the stable and latest V1 action
+1. [View Discussions](https://github.com/philip-gai/github-ado-chatops/discussions)
+2. [Start a new discussion!](https://github.com/philip-gai/github-ado-chatops/discussions/new)

@@ -1,4 +1,4 @@
-name: "GitHub <> Azure DevOps ChatOps"
+name: "Azure DevOps ChatOps"
 description: "Integrate GitHub with Azure DevOps via ChatOps"
 author: "philip-gai"
 inputs:

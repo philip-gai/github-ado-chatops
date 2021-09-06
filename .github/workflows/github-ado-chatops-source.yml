@@ -1,26 +1,14 @@
-name: "CI - Azure DevOps ChatOps"
+name: "Run Azure DevOps ChatOps from Source"
 
 on:
-  pull_request:
-  push:
-    branches:
-      - main
-      - develop
-      - "releases/*"
+  issue_comment:
+    types: [created]
 
 permissions:
   issues: write
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - run: |
-          npm install
-      - run: |
-          npm run all
-  test:
+  run-github-ado-chatops:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
