@@ -1,6 +1,9 @@
 name: "Azure DevOps ChatOps"
 description: "Integrate GitHub with Azure DevOps via ChatOps"
 author: "philip-gai"
+branding:
+  icon: 'git-branch'  
+  color: 'blue'
 inputs:
   ado_domain:
     description: "The domain your ADO instance is in"
