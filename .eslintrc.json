@@ -1,5 +1,5 @@
 {
-    "plugins": ["jest", "@typescript-eslint"],
+    "plugins": ["jest", "@typescript-eslint", "filenames", "i18n-text"],
     "extends": ["plugin:github/recommended"],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
@@ -43,7 +43,11 @@
       "@typescript-eslint/restrict-plus-operands": "error",
       "semi": 2,
       "@typescript-eslint/type-annotation-spacing": "error",
-      "@typescript-eslint/unbound-method": "error"
+      "@typescript-eslint/unbound-method": "error",
+      "filenames/match-regex": 0,
+      "filenames/match-exported": 2,
+      "filenames/no-index": 2,
+      "i18n-text/no-en": 0
     },
     "env": {
       "node": true,
@@ -51,3 +55,4 @@
       "jest/globals": true
     }
   }
+  

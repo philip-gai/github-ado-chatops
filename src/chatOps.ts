@@ -6,7 +6,6 @@ export interface ChatOpInfo {
 export type ChatOpCommand = '/create-branch-ado' | '/cb-ado' | 'None';
 export type ChatOpParam = '-username' | '-branch' | 'None';
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export type ParamValueMap = { [_ in ChatOpParam]?: string };
 
 const createBranchChatOpInfo: ChatOpInfo = {

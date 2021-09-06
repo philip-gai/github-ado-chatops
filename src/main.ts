@@ -1,13 +1,14 @@
 import * as core from '@actions/core';
 import * as github from '@actions/github';
-import { context } from '@actions/github/lib/utils';
-import { ChatOpService } from './chatOpService';
-import { IssueCommentEvent } from '@octokit/webhooks-definitions/schema';
-import { ActionEvent } from './ActionEvent';
-import { ChatOpCommand, ChatOpParam, ParamValueMap } from './ChatOps';
+import { ChatOpCommand, ChatOpParam, ParamValueMap } from './chatOps';
+import { ActionEvent } from './actionEvent';
 import { AzureDevOpsService } from './azureDevOpsService';
-import { Octokit } from '@octokit/rest';
+import { ChatOpService } from './chatOpService';
 import { ConfigService } from './configService';
+// eslint-disable-next-line import/no-unresolved
+import { IssueCommentEvent } from '@octokit/webhooks-definitions/schema';
+import { Octokit } from '@octokit/rest';
+import { context } from '@actions/github/lib/utils';
 
 async function run(): Promise<void> {
   try {

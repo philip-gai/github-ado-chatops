@@ -1,4 +1,4 @@
-import { ChatOpCommand, ChatOpParam, chatOps, chatOpInfo, ParamValueMap } from './ChatOps';
+import { ChatOpCommand, ChatOpParam, ParamValueMap, chatOpInfo, chatOps } from './chatOps';
 
 export class ChatOpService {
   private constructor() {}

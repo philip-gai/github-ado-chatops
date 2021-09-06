@@ -1,5 +1,5 @@
 import * as core from '@actions/core';
-import { ConfigService, AppConfig } from './configService';
+import { AppConfig, ConfigService } from './configService';
 import { AzureDevOpsClient } from './azureDevOpsClient';
 
 export interface CreateBranchOptions {
