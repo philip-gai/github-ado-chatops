@@ -1,5 +1,5 @@
 name: "GitHub <> Azure DevOps ChatOps"
-description: "Integrates GitHub with Azure DevOps (ADO) via ChatOps. Example: Create a branch in an Azure Repo directly from a GitHub Issue using /cb-ado."
+description: "Integrate GitHub with Azure DevOps via ChatOps"
 author: "philip-gai"
 inputs:
   ado_domain:
@@ -17,6 +17,9 @@ inputs:
     required: true
   ado_pat:
     description: "The Personal Access Token (PAT) to use when authenticating with Azure DevOps. Use a repository secret here!"
+    required: true
+  github_token:
+    description: "The GitHub Token to use for accessing your repos and stuff. Usually secrets.GITHUB_TOKEN"
     required: true
 runs:
   using: "node12"
