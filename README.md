@@ -1,8 +1,8 @@
 # Azure DevOps ChatOps - GitHub Action
 
-Integrate GitHub with Azure DevOps via ChatOps. 🚀
+Integrate GitHub with Azure DevOps via ChatOps! 🚀
 
-https://user-images.githubusercontent.com/17363579/132158303-25ba1283-7ffa-49b5-a7ab-f93643f45a9d.mov
+https://user-images.githubusercontent.com/17363579/132159736-93355b49-f446-427e-a9fc-fb78c6b54938.mov
 
 ## ChatOp Commands
 
@@ -45,3 +45,18 @@ jobs:
 4. You can now use ADO ChatOps in your GitHub repo! 🎉🎉🎉
 
 ## Feature Requests and Feedback
+I would love to hear your feedback. Let me know if you've run into any bugs, or have any feature requests.
+
+### Feature Requests
+1. [View enhancements and feature requests already in the backlog](https://github.com/philip-gai/github-ado-chatops/issues?q=is%3Aopen+is%3Aissue+label%3A%22feature+request%22%2Cenhancement)
+2. [Create a feature request](https://github.com/philip-gai/github-ado-chatops/issues/new?assignees=&labels=feature+request&template=feature_request.md&title=)
+
+### Bugs
+1. [View known issues](https://github.com/philip-gai/github-ado-chatops/issues?q=is%3Aopen+is%3Aissue+label%3Abug)
+2. [Report a bug](https://github.com/philip-gai/github-ado-chatops/issues/new?assignees=&labels=bug&template=bug_report.md&title=)
+
+### Questions / Conversations
+Do you have any questions? Want to just talk and ask me stuff?
+
+1. [View Discussions](https://github.com/philip-gai/github-ado-chatops/discussions)
+2. [Start a new discussion!](https://github.com/philip-gai/github-ado-chatops/discussions/new)
