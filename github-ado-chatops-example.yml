@@ -1,0 +1,21 @@
+name: "Run Azure DevOps ChatOps"
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  issues: write
+
+jobs:
+  run-github-ado-chatops:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: philip-gai/github-ado-chatops
+        with:
+          ado_org: philip-gai
+          ado_project: github-ado-chatops
+          ado_repo: github-ado-chatops
+          ado_pat: ${{ secrets.ADO_PAT }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
