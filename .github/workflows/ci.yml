@@ -1,4 +1,4 @@
-name: "CI: GitHub <> Azure DevOps ChatOps"
+name: "CI - Azure DevOps ChatOps"
 
 on:
   pull_request:

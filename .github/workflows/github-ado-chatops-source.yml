@@ -1,4 +1,4 @@
-name: "Source: Run GitHub <> Azure DevOps ChatOps"
+name: "Run Azure DevOps ChatOps from Source"
 
 on:
   issue_comment:
