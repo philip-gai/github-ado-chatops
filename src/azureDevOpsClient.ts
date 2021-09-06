@@ -1,9 +1,9 @@
-import * as core from '@actions/core';
 import * as azdev from 'azure-devops-node-api';
-import { IGitApi } from 'azure-devops-node-api/GitApi';
-import { GitRepository, GitRefUpdate, GitRefUpdateResult } from 'azure-devops-node-api/interfaces/GitInterfaces';
+import * as core from '@actions/core';
+import { AppConfig, ConfigService } from './configService';
+import { GitRefUpdate, GitRefUpdateResult, GitRepository } from 'azure-devops-node-api/interfaces/GitInterfaces';
 import { CreateBranchOptions } from './azureDevOpsService';
-import { ConfigService, AppConfig } from './configService';
+import { IGitApi } from 'azure-devops-node-api/GitApi';
 
 export class AzureDevOpsClient {
   private _appConfig: AppConfig = ConfigService.defaultAppConfig;

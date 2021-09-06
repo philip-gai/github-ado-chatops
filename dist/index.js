@@ -1,25 +1,6 @@
 require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 4275:
-/***/ ((__unused_webpack_module, exports) => {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.chatOps = exports.chatOpInfo = void 0;
-const createBranchChatOpInfo = {
-    commands: ['/cb-ado', '/create-branch-ado'],
-    params: ['-branch', '-username']
-};
-const chatOpInfo = [createBranchChatOpInfo];
-exports.chatOpInfo = chatOpInfo;
-const chatOps = createBranchChatOpInfo.commands;
-exports.chatOps = chatOps;
-
-
-/***/ }),
-
 /***/ 7743:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -55,8 +36,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AzureDevOpsClient = void 0;
-const core = __importStar(__nccwpck_require__(2186));
 const azdev = __importStar(__nccwpck_require__(7967));
+const core = __importStar(__nccwpck_require__(2186));
 const configService_1 = __nccwpck_require__(5460);
 class AzureDevOpsClient {
     constructor(appConfig, azDevClient) {
@@ -259,7 +240,7 @@ exports.AzureDevOpsService = AzureDevOpsService;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ChatOpService = void 0;
-const ChatOps_1 = __nccwpck_require__(4275);
+const chatOps_1 = __nccwpck_require__(7118);
 class ChatOpService {
     constructor() { }
     static build() {
@@ -267,11 +248,11 @@ class ChatOpService {
     }
     getChatOpCommand(comment) {
         const command = this.getCommandString(comment);
-        return ChatOps_1.chatOps.find(op => op === command) || 'None';
+        return chatOps_1.chatOps.find(op => op === command) || 'None';
     }
     getParameterValues(command, comment) {
         var _a;
-        const possibleParams = ((_a = ChatOps_1.chatOpInfo.find(info => info.commands.includes(command))) === null || _a === void 0 ? void 0 : _a.params) || [];
+        const possibleParams = ((_a = chatOps_1.chatOpInfo.find(info => info.commands.includes(command))) === null || _a === void 0 ? void 0 : _a.params) || [];
         if (possibleParams.length === 0)
             return {};
         const paramValueMap = {};
@@ -296,6 +277,25 @@ class ChatOpService {
     }
 }
 exports.ChatOpService = ChatOpService;
+
+
+/***/ }),
+
+/***/ 7118:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.chatOps = exports.chatOpInfo = void 0;
+const createBranchChatOpInfo = {
+    commands: ['/cb-ado', '/create-branch-ado'],
+    params: ['-branch', '-username']
+};
+const chatOpInfo = [createBranchChatOpInfo];
+exports.chatOpInfo = chatOpInfo;
+const chatOps = createBranchChatOpInfo.commands;
+exports.chatOps = chatOps;
 
 
 /***/ }),
@@ -454,10 +454,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
 const github = __importStar(__nccwpck_require__(5438));
-const utils_1 = __nccwpck_require__(3030);
-const chatOpService_1 = __nccwpck_require__(2842);
 const azureDevOpsService_1 = __nccwpck_require__(5054);
+const chatOpService_1 = __nccwpck_require__(2842);
 const configService_1 = __nccwpck_require__(5460);
+const utils_1 = __nccwpck_require__(3030);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -658,7 +658,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getState = exports.saveState = exports.group = exports.endGroup = exports.startGroup = exports.info = exports.warning = exports.error = exports.debug = exports.isDebug = exports.setFailed = exports.setCommandEcho = exports.setOutput = exports.getBooleanInput = exports.getMultilineInput = exports.getInput = exports.addPath = exports.setSecret = exports.exportVariable = exports.ExitCode = void 0;
+exports.getState = exports.saveState = exports.group = exports.endGroup = exports.startGroup = exports.info = exports.notice = exports.warning = exports.error = exports.debug = exports.isDebug = exports.setFailed = exports.setCommandEcho = exports.setOutput = exports.getBooleanInput = exports.getMultilineInput = exports.getInput = exports.addPath = exports.setSecret = exports.exportVariable = exports.ExitCode = void 0;
 const command_1 = __nccwpck_require__(7351);
 const file_command_1 = __nccwpck_require__(717);
 const utils_1 = __nccwpck_require__(5278);
@@ -836,19 +836,30 @@ exports.debug = debug;
 /**
  * Adds an error issue
  * @param message error issue message. Errors will be converted to string via toString()
+ * @param properties optional properties to add to the annotation.
  */
-function error(message) {
-    command_1.issue('error', message instanceof Error ? message.toString() : message);
+function error(message, properties = {}) {
+    command_1.issueCommand('error', utils_1.toCommandProperties(properties), message instanceof Error ? message.toString() : message);
 }
 exports.error = error;
 /**
- * Adds an warning issue
+ * Adds a warning issue
  * @param message warning issue message. Errors will be converted to string via toString()
+ * @param properties optional properties to add to the annotation.
  */
-function warning(message) {
-    command_1.issue('warning', message instanceof Error ? message.toString() : message);
+function warning(message, properties = {}) {
+    command_1.issueCommand('warning', utils_1.toCommandProperties(properties), message instanceof Error ? message.toString() : message);
 }
 exports.warning = warning;
+/**
+ * Adds a notice issue
+ * @param message notice issue message. Errors will be converted to string via toString()
+ * @param properties optional properties to add to the annotation.
+ */
+function notice(message, properties = {}) {
+    command_1.issueCommand('notice', utils_1.toCommandProperties(properties), message instanceof Error ? message.toString() : message);
+}
+exports.notice = notice;
 /**
  * Writes info to log with console.log.
  * @param message info message
@@ -982,7 +993,7 @@ exports.issueCommand = issueCommand;
 // We use any as a valid input type
 /* eslint-disable @typescript-eslint/no-explicit-any */
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.toCommandValue = void 0;
+exports.toCommandProperties = exports.toCommandValue = void 0;
 /**
  * Sanitizes an input into a string so it can be passed into issueCommand safely
  * @param input input to sanitize into a string
@@ -997,6 +1008,25 @@ function toCommandValue(input) {
     return JSON.stringify(input);
 }
 exports.toCommandValue = toCommandValue;
+/**
+ *
+ * @param annotationProperties
+ * @returns The command properties to send with the actual annotation command
+ * See IssueCommandProperties: https://github.com/actions/runner/blob/main/src/Runner.Worker/ActionCommandManager.cs#L646
+ */
+function toCommandProperties(annotationProperties) {
+    if (!Object.keys(annotationProperties).length) {
+        return {};
+    }
+    return {
+        title: annotationProperties.title,
+        line: annotationProperties.startLine,
+        endLine: annotationProperties.endLine,
+        col: annotationProperties.startColumn,
+        endColumn: annotationProperties.endColumn
+    };
+}
+exports.toCommandProperties = toCommandProperties;
 //# sourceMappingURL=utils.js.map
 
 /***/ }),
