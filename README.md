@@ -45,7 +45,7 @@ jobs:
 4. You can now use ADO ChatOps in your GitHub repo! 🎉🎉🎉
 
 ### Debugging
-1. Set env variable ACTIONS_RUNNER_DEBUG to true in your workflow file to get debug logging
+1. Set a secret in your repo named `ACTIONS_RUNNER_DEBUG` to `true` to get debug logging ([Reference](https://docs.github.com/en/actions/monitoring-and-troubleshooting-workflows/enabling-debug-logging))
 
 ## Feature Requests and Feedback
 I would love to hear your feedback. Let me know if you've run into any bugs, or have any feature requests.
