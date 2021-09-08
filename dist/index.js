@@ -485,12 +485,7 @@ function run() {
                         username: params['-username'] || issueCommentPayload.sender.login,
                         sourceBranch: params['-branch']
                     });
-                    yield octokit.rest.issues.createComment({
-                        owner: utils_1.context.issue.owner,
-                        repo: utils_1.context.issue.repo,
-                        issue_number: utils_1.context.issue.number,
-                        body: resultMessage || 'There was nothing to do!'
-                    });
+                    yield octokit.rest.issues.createComment(Object.assign(Object.assign({}, utils_1.context.issue), { issue_number: utils_1.context.issue.number, body: resultMessage || 'There was nothing to do!' }));
                 }
             }
             core.info(resultMessage);
