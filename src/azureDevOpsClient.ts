@@ -1,9 +1,10 @@
 import * as azdev from 'azure-devops-node-api';
 import * as core from '@actions/core';
-import { AppConfig, ConfigService } from './configService';
+import { ConfigService } from './configService';
 import { GitRefUpdate, GitRefUpdateResult, GitRepository } from 'azure-devops-node-api/interfaces/GitInterfaces';
 import { CreateBranchOptions } from './azureDevOpsService';
 import { IGitApi } from 'azure-devops-node-api/GitApi';
+import { AppConfig } from './appConfig';
 
 export class AzureDevOpsClient {
   private _appConfig: AppConfig = ConfigService.defaultAppConfig;
@@ -31,13 +32,13 @@ export class AzureDevOpsClient {
       const repo = await this.getRepo(gitClient);
       core.info('Got it.');
 
-      let sourceBranch = options.sourceBranch;
+      let sourceBranch = options.sourceBranch || this._appConfig.default_source_branch;
       if (!sourceBranch) {
         core.info('Getting the default branch in ADO...');
         sourceBranch = this.getDefaultBranch(repo);
         core.info('Got it.');
       }
-      const result = await this.createBranchInner(branchName, options, gitClient, repo);
+      const result = await this.createBranchInner(branchName, sourceBranch, gitClient, repo);
       return result;
     } catch (error: unknown) {
       core.error(`Failed to create branch: ${branchName}`);
@@ -63,11 +64,11 @@ export class AzureDevOpsClient {
     return refDeleteResult;
   }
 
-  private async createBranchInner(branchName: string, options: CreateBranchOptions, gitClient: IGitApi, repo: GitRepository): Promise<GitRefUpdateResult> {
-    core.debug(`Creating branch from ${options.sourceBranch}.`);
+  private async createBranchInner(branchName: string, sourceBranch: string, gitClient: IGitApi, repo: GitRepository): Promise<GitRefUpdateResult> {
+    core.debug(`Creating branch from ${sourceBranch}.`);
 
-    core.debug(`Getting ${options.sourceBranch} refs...`);
-    const gitRefs = await gitClient.getRefs(repo.id as string, this._appConfig.ado_project, options.sourceBranch);
+    core.debug(`Getting ${sourceBranch} refs...`);
+    const gitRefs = await gitClient.getRefs(repo.id as string, this._appConfig.ado_project, sourceBranch);
     const sourceRef = gitRefs[0];
     core.debug("Got 'em.");
 

@@ -1,4 +1,5 @@
 import * as core from '@actions/core';
+import { AppConfig } from './appConfig';
 
 export class ConfigService {
   static defaultAppConfig: AppConfig = {
@@ -7,7 +8,8 @@ export class ConfigService {
     ado_pat: '',
     ado_project: '',
     ado_repo: '',
-    github_token: ''
+    github_token: '',
+    default_source_branch: ''
   };
   appConfig: AppConfig = ConfigService.defaultAppConfig;
 
@@ -27,29 +29,6 @@ export class ConfigService {
     return new ConfigService(config);
   }
 
-  private static mergeDefaults(loadedConfig: AppConfig): AppConfig {
-    return {
-      ado_domain: loadedConfig.ado_domain || ConfigService.defaultAppConfig.ado_domain,
-      ado_org: loadedConfig.ado_org,
-      ado_pat: loadedConfig.ado_pat,
-      ado_project: loadedConfig.ado_project,
-      ado_repo: loadedConfig.ado_repo,
-      github_token: loadedConfig.github_token
-    };
-  }
-
-  private static validateConfig(config: AppConfig): string[] {
-    const errorMessages: string[] = [];
-    // There are better ways to do this but I'm being lazy
-    if (!config.ado_domain) errorMessages.push('No ado_org was found. Check your inputs');
-    if (!config.ado_org) errorMessages.push('No ado_org was found. Check your inputs');
-    if (!config.ado_pat) errorMessages.push('No ado_pat was found. Check your inputs');
-    if (!config.ado_project) errorMessages.push('No ado_project was found. Check your inputs');
-    if (!config.ado_repo) errorMessages.push('No ado_repo was found. Check your inputs');
-    if (!config.github_token) errorMessages.push('No github_token was found. Check your inputs');
-    return errorMessages;
-  }
-
   private static loadConfig = (): AppConfig => {
     const ado_domain = core.getInput('ado_domain');
     const ado_org = core.getInput('ado_org');
@@ -57,6 +36,7 @@ export class ConfigService {
     const ado_repo = core.getInput('ado_repo');
     const ado_pat = core.getInput('ado_pat');
     const github_token = core.getInput('github_token');
+    const default_source_branch = core.getInput('default_source_branch');
 
     // debug is only output if you set the secret `ACTIONS_RUNNER_DEBUG` to true
     core.info(`ado_domain: ${ado_domain}!`);
@@ -72,16 +52,32 @@ export class ConfigService {
       ado_project,
       ado_repo,
       ado_pat,
-      github_token
+      github_token,
+      default_source_branch
     };
   };
-}
 
-export interface AppConfig {
-  ado_domain: string;
-  ado_org: string;
-  ado_project: string;
-  ado_repo: string;
-  ado_pat: string;
-  github_token: string;
+  private static mergeDefaults(loadedConfig: AppConfig): AppConfig {
+    return {
+      ado_domain: loadedConfig.ado_domain || ConfigService.defaultAppConfig.ado_domain,
+      ado_org: loadedConfig.ado_org,
+      ado_pat: loadedConfig.ado_pat,
+      ado_project: loadedConfig.ado_project,
+      ado_repo: loadedConfig.ado_repo,
+      github_token: loadedConfig.github_token,
+      default_source_branch: loadedConfig.default_source_branch
+    };
+  }
+
+  private static validateConfig(config: AppConfig): string[] {
+    const errorMessages: string[] = [];
+    // There are better ways to do this but I'm being lazy
+    if (!config.ado_domain) errorMessages.push('No ado_org was found. Check your inputs');
+    if (!config.ado_org) errorMessages.push('No ado_org was found. Check your inputs');
+    if (!config.ado_pat) errorMessages.push('No ado_pat was found. Check your inputs');
+    if (!config.ado_project) errorMessages.push('No ado_project was found. Check your inputs');
+    if (!config.ado_repo) errorMessages.push('No ado_repo was found. Check your inputs');
+    if (!config.github_token) errorMessages.push('No github_token was found. Check your inputs');
+    return errorMessages;
+  }
 }

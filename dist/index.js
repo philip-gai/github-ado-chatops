@@ -63,13 +63,13 @@ class AzureDevOpsClient {
                 core.info('Getting the repo...');
                 const repo = yield this.getRepo(gitClient);
                 core.info('Got it.');
-                let sourceBranch = options.sourceBranch;
+                let sourceBranch = options.sourceBranch || this._appConfig.default_source_branch;
                 if (!sourceBranch) {
                     core.info('Getting the default branch in ADO...');
                     sourceBranch = this.getDefaultBranch(repo);
                     core.info('Got it.');
                 }
-                const result = yield this.createBranchInner(branchName, options, gitClient, repo);
+                const result = yield this.createBranchInner(branchName, sourceBranch, gitClient, repo);
                 return result;
             }
             catch (error) {
@@ -94,11 +94,11 @@ class AzureDevOpsClient {
             return refDeleteResult;
         });
     }
-    createBranchInner(branchName, options, gitClient, repo) {
+    createBranchInner(branchName, sourceBranch, gitClient, repo) {
         return __awaiter(this, void 0, void 0, function* () {
-            core.debug(`Creating branch from ${options.sourceBranch}.`);
-            core.debug(`Getting ${options.sourceBranch} refs...`);
-            const gitRefs = yield gitClient.getRefs(repo.id, this._appConfig.ado_project, options.sourceBranch);
+            core.debug(`Creating branch from ${sourceBranch}.`);
+            core.debug(`Getting ${sourceBranch} refs...`);
+            const gitRefs = yield gitClient.getRefs(repo.id, this._appConfig.ado_project, sourceBranch);
             const sourceRef = gitRefs[0];
             core.debug("Got 'em.");
             const gitRefUpdates = [
@@ -360,7 +360,8 @@ class ConfigService {
             ado_pat: loadedConfig.ado_pat,
             ado_project: loadedConfig.ado_project,
             ado_repo: loadedConfig.ado_repo,
-            github_token: loadedConfig.github_token
+            github_token: loadedConfig.github_token,
+            default_source_branch: loadedConfig.default_source_branch
         };
     }
     static validateConfig(config) {
@@ -388,7 +389,8 @@ ConfigService.defaultAppConfig = {
     ado_pat: '',
     ado_project: '',
     ado_repo: '',
-    github_token: ''
+    github_token: '',
+    default_source_branch: ''
 };
 ConfigService.loadConfig = () => {
     const ado_domain = core.getInput('ado_domain');
@@ -397,6 +399,7 @@ ConfigService.loadConfig = () => {
     const ado_repo = core.getInput('ado_repo');
     const ado_pat = core.getInput('ado_pat');
     const github_token = core.getInput('github_token');
+    const default_source_branch = core.getInput('default_source_branch');
     // debug is only output if you set the secret `ACTIONS_RUNNER_DEBUG` to true
     core.info(`ado_domain: ${ado_domain}!`);
     core.info(`ado_org: ${ado_org}!`);
@@ -410,9 +413,89 @@ ConfigService.loadConfig = () => {
         ado_project,
         ado_repo,
         ado_pat,
-        github_token
+        github_token,
+        default_source_branch
     };
 };
+
+
+/***/ }),
+
+/***/ 6851:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.issueCommentHandler = void 0;
+const core = __importStar(__nccwpck_require__(2186));
+const utils_1 = __nccwpck_require__(3030);
+const issueCommentHandler = (octokit, chatOpService, azureDevOpsService) => __awaiter(void 0, void 0, void 0, function* () {
+    let resultMessage = '';
+    const issueCommentPayload = utils_1.context.payload;
+    if (issueCommentPayload.action === 'created') {
+        const comment = issueCommentPayload.comment.body;
+        core.debug(`Comment: ${comment}`);
+        const chatOpCommand = getChatOpCommand(chatOpService, comment);
+        if (chatOpCommand === 'None') {
+            core.info('Done.');
+            process.exit(core.ExitCode.Success);
+        }
+        const params = getParameters(chatOpService, chatOpCommand, comment);
+        resultMessage = yield azureDevOpsService.createBranch({
+            issueNumber: issueCommentPayload.issue.number,
+            issueTitle: issueCommentPayload.issue.title,
+            username: params['-username'] || issueCommentPayload.sender.login,
+            sourceBranch: params['-branch']
+        });
+        yield octokit.rest.issues.createComment(Object.assign(Object.assign({}, utils_1.context.issue), { issue_number: utils_1.context.issue.number, body: resultMessage || 'There was nothing to do!' }));
+    }
+    return resultMessage;
+});
+exports.issueCommentHandler = issueCommentHandler;
+function getChatOpCommand(chatOpService, comment) {
+    core.info('Checking for ChatOp command...');
+    const chatOpCommand = chatOpService.getChatOpCommand(comment);
+    core.info(`Found ChatOp: ${chatOpCommand}`);
+    return chatOpCommand;
+}
+function getParameters(chatOpService, chatOpCommand, comment) {
+    core.info('Getting parameters...');
+    const paramValues = chatOpService.getParameterValues(chatOpCommand, comment);
+    for (const key of Object.keys(paramValues)) {
+        const value = paramValues[key];
+        core.info(`Found ${key} ${value}`);
+    }
+    return paramValues;
+}
 
 
 /***/ }),
@@ -457,6 +540,7 @@ const azureDevOpsService_1 = __nccwpck_require__(5054);
 const chatOpService_1 = __nccwpck_require__(2842);
 const configService_1 = __nccwpck_require__(5460);
 const utils_1 = __nccwpck_require__(3030);
+const handlers_1 = __nccwpck_require__(6851);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
@@ -471,22 +555,7 @@ function run() {
             core.info('Done.');
             let resultMessage = '';
             if (utils_1.context.eventName === 'issue_comment') {
-                const issueCommentPayload = utils_1.context.payload;
-                if (issueCommentPayload.action === 'created') {
-                    const comment = issueCommentPayload.comment.body;
-                    core.info(`Comment: ${comment}`);
-                    const chatOpCommand = getChatOpCommand(chatOpService, comment);
-                    if (chatOpCommand === 'None')
-                        return core.info('Done.');
-                    const params = getParameters(chatOpService, chatOpCommand, comment);
-                    resultMessage = yield azureDevOpsService.createBranch({
-                        issueNumber: issueCommentPayload.issue.number,
-                        issueTitle: issueCommentPayload.issue.title,
-                        username: params['-username'] || issueCommentPayload.sender.login,
-                        sourceBranch: params['-branch']
-                    });
-                    yield octokit.rest.issues.createComment(Object.assign(Object.assign({}, utils_1.context.issue), { issue_number: utils_1.context.issue.number, body: resultMessage || 'There was nothing to do!' }));
-                }
+                resultMessage = yield (0, handlers_1.issueCommentHandler)(octokit, chatOpService, azureDevOpsService);
             }
             core.info(resultMessage);
         }
@@ -498,21 +567,6 @@ function run() {
             core.setFailed(errorMessage);
         }
     });
-}
-function getChatOpCommand(chatOpService, comment) {
-    core.info('Checking for ChatOp command...');
-    const chatOpCommand = chatOpService.getChatOpCommand(comment);
-    core.info(`Found ChatOp: ${chatOpCommand}`);
-    return chatOpCommand;
-}
-function getParameters(chatOpService, chatOpCommand, comment) {
-    core.info('Getting parameters...');
-    const paramValues = chatOpService.getParameterValues(chatOpCommand, comment);
-    for (const key of Object.keys(paramValues)) {
-        const value = paramValues[key];
-        core.info(`Found ${key} ${value}`);
-    }
-    return paramValues;
 }
 run();
 
