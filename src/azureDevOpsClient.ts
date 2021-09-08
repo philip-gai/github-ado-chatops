@@ -1,11 +1,7 @@
 import * as azdev from 'azure-devops-node-api';
 import * as core from '@actions/core';
 import { AppConfig, ConfigService } from './configService';
-import {
-  GitRefUpdate,
-  GitRefUpdateResult,
-  GitRepository
-} from 'azure-devops-node-api/interfaces/GitInterfaces';
+import { GitRefUpdate, GitRefUpdateResult, GitRepository } from 'azure-devops-node-api/interfaces/GitInterfaces';
 import { CreateBranchOptions } from './azureDevOpsService';
 import { IGitApi } from 'azure-devops-node-api/GitApi';
 
@@ -26,10 +22,7 @@ export class AzureDevOpsClient {
     return new AzureDevOpsClient(appConfig, azDevClient);
   }
 
-  async createBranch(
-    branchName: string,
-    options: CreateBranchOptions
-  ): Promise<GitRefUpdateResult> {
+  async createBranch(branchName: string, options: CreateBranchOptions): Promise<GitRefUpdateResult> {
     try {
       core.info('Getting the ADO git API...');
       const gitClient = await this._azDevClient.getGitApi();
@@ -44,12 +37,7 @@ export class AzureDevOpsClient {
         sourceBranch = this.getDefaultBranch(repo);
         core.info('Got it.');
       }
-      const result = await this.createBranchInner(
-        branchName,
-        options,
-        gitClient,
-        repo
-      );
+      const result = await this.createBranchInner(branchName, options, gitClient, repo);
       return result;
     } catch (error: unknown) {
       core.error(`Failed to create branch: ${branchName}`);
@@ -57,10 +45,7 @@ export class AzureDevOpsClient {
     }
   }
 
-  async deleteBranch(
-    refName?: string,
-    refObjectId?: string
-  ): Promise<GitRefUpdateResult> {
+  async deleteBranch(refName?: string, refObjectId?: string): Promise<GitRefUpdateResult> {
     const gitClient = await this._azDevClient.getGitApi();
 
     const gitRefUpdates: GitRefUpdate[] = [
@@ -72,30 +57,17 @@ export class AzureDevOpsClient {
     ];
 
     // create a new branch from the source
-    const updateResults = await gitClient.updateRefs(
-      gitRefUpdates,
-      this._appConfig.ado_repo,
-      this._appConfig.ado_project
-    );
+    const updateResults = await gitClient.updateRefs(gitRefUpdates, this._appConfig.ado_repo, this._appConfig.ado_project);
     const refDeleteResult = updateResults[0];
 
     return refDeleteResult;
   }
 
-  private async createBranchInner(
-    branchName: string,
-    options: CreateBranchOptions,
-    gitClient: IGitApi,
-    repo: GitRepository
-  ): Promise<GitRefUpdateResult> {
+  private async createBranchInner(branchName: string, options: CreateBranchOptions, gitClient: IGitApi, repo: GitRepository): Promise<GitRefUpdateResult> {
     core.debug(`Creating branch from ${options.sourceBranch}.`);
 
     core.debug(`Getting ${options.sourceBranch} refs...`);
-    const gitRefs = await gitClient.getRefs(
-      repo.id as string,
-      this._appConfig.ado_project,
-      options.sourceBranch
-    );
+    const gitRefs = await gitClient.getRefs(repo.id as string, this._appConfig.ado_project, options.sourceBranch);
     const sourceRef = gitRefs[0];
     core.debug("Got 'em.");
 
@@ -109,11 +81,7 @@ export class AzureDevOpsClient {
 
     // create a new branch from the source
     core.debug('Creating the new branch...');
-    const updateResults = await gitClient.updateRefs(
-      gitRefUpdates,
-      this._appConfig.ado_repo,
-      this._appConfig.ado_project
-    );
+    const updateResults = await gitClient.updateRefs(gitRefUpdates, this._appConfig.ado_repo, this._appConfig.ado_project);
     const refCreateResult = updateResults[0];
 
     return refCreateResult;
@@ -129,17 +97,10 @@ export class AzureDevOpsClient {
   }
 
   private async getRepo(gitClient: IGitApi): Promise<GitRepository> {
-    const repo = await gitClient.getRepository(
-      this._appConfig.ado_repo,
-      this._appConfig.ado_project
-    );
+    const repo = await gitClient.getRepository(this._appConfig.ado_repo, this._appConfig.ado_project);
     if (!repo.id) {
-      core.error(
-        `Repo ${this._appConfig.ado_repo} does not exist in project ${this._appConfig.ado_project}`
-      );
-      throw new Error(
-        `Repo ${this._appConfig.ado_repo} does not exist in project ${this._appConfig.ado_project}`
-      );
+      core.error(`Repo ${this._appConfig.ado_repo} does not exist in project ${this._appConfig.ado_project}`);
+      throw new Error(`Repo ${this._appConfig.ado_repo} does not exist in project ${this._appConfig.ado_project}`);
     }
     return repo;
   }
