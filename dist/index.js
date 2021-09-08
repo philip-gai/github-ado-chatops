@@ -451,12 +451,15 @@ const issueCommentHandler = (octokit, chatOpService, azureDevOpsService) => __aw
     const issueCommentPayload = utils_1.context.payload;
     if (issueCommentPayload.action === 'created') {
         const comment = issueCommentPayload.comment.body;
+        let updatedComment = comment;
         core.debug(`Comment: ${comment}`);
         const chatOpCommand = getChatOpCommand(chatOpService, comment);
         if (chatOpCommand === 'None') {
             core.info('Done.');
             process.exit(core.ExitCode.Success);
         }
+        updatedComment += '\n1. Creating the branch in ADO...';
+        yield octokit.rest.issues.updateComment(Object.assign(Object.assign({}, utils_1.context.issue), { comment_id: issueCommentPayload.comment.id, body: updatedComment }));
         const params = getParameters(chatOpService, chatOpCommand, comment);
         resultMessage = yield azureDevOpsService.createBranch({
             issueNumber: issueCommentPayload.issue.number,
@@ -465,7 +468,8 @@ const issueCommentHandler = (octokit, chatOpService, azureDevOpsService) => __aw
             sourceBranch: params['-branch'],
             branchType: params['-type']
         });
-        yield octokit.rest.issues.createComment(Object.assign(Object.assign({}, utils_1.context.issue), { issue_number: utils_1.context.issue.number, body: resultMessage || 'There was nothing to do!' }));
+        updatedComment += `\n1. ${resultMessage}`;
+        yield octokit.rest.issues.updateComment(Object.assign(Object.assign({}, utils_1.context.issue), { comment_id: issueCommentPayload.comment.id, body: updatedComment }));
     }
     return resultMessage;
 });

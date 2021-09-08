@@ -11,6 +11,7 @@ export const issueCommentHandler = async (octokit: Octokit, chatOpService: ChatO
   const issueCommentPayload = context.payload as IssueCommentEvent;
   if (issueCommentPayload.action === 'created') {
     const comment = issueCommentPayload.comment.body;
+    let updatedComment = comment;
     core.debug(`Comment: ${comment}`);
     const chatOpCommand = getChatOpCommand(chatOpService, comment);
 
@@ -18,6 +19,14 @@ export const issueCommentHandler = async (octokit: Octokit, chatOpService: ChatO
       core.info('Done.');
       process.exit(core.ExitCode.Success);
     }
+
+    updatedComment += '\n1. Creating the branch in ADO...';
+
+    await octokit.rest.issues.updateComment({
+      ...context.issue,
+      comment_id: issueCommentPayload.comment.id,
+      body: updatedComment
+    });
 
     const params = getParameters(chatOpService, chatOpCommand, comment);
 
@@ -29,10 +38,12 @@ export const issueCommentHandler = async (octokit: Octokit, chatOpService: ChatO
       branchType: params['-type']
     });
 
-    await octokit.rest.issues.createComment({
+    updatedComment += `\n1. ${resultMessage}`;
+
+    await octokit.rest.issues.updateComment({
       ...context.issue,
-      issue_number: context.issue.number,
-      body: resultMessage || 'There was nothing to do!'
+      comment_id: issueCommentPayload.comment.id,
+      body: updatedComment
     });
   }
   return resultMessage;
