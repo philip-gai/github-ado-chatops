@@ -4,13 +4,13 @@ export interface ChatOpInfo {
 }
 
 export type ChatOpCommand = '/create-branch-ado' | '/cb-ado' | 'None';
-export type ChatOpParam = '-username' | '-branch' | 'None';
+export type ChatOpParam = '-username' | '-branch' | '-type' | 'None';
 
 export type ParamValueMap = { [_ in ChatOpParam]?: string };
 
 const createBranchChatOpInfo: ChatOpInfo = {
   commands: ['/cb-ado', '/create-branch-ado'],
-  params: ['-branch', '-username']
+  params: ['-branch', '-username', '-type']
 };
 
 const chatOpInfo: ChatOpInfo[] = [createBranchChatOpInfo];

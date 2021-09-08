@@ -2,12 +2,14 @@ import * as core from '@actions/core';
 import { ConfigService } from './configService';
 import { AzureDevOpsClient } from './azureDevOpsClient';
 import { AppConfig } from './appConfig';
+import { BranchType } from './branchType';
 
 export interface CreateBranchOptions {
   issueNumber: number;
   issueTitle: string;
   username: string;
   sourceBranch?: string;
+  branchType?: string;
 }
 
 export class AzureDevOpsService {
@@ -56,8 +58,18 @@ export class AzureDevOpsService {
 
   private buildBranchName(options: CreateBranchOptions): string {
     const issueInfo = `${options.issueNumber}-${options.issueTitle.toLowerCase()}`;
-    const branchName = `users/${this.makeGitSafe(options.username)}/${this.makeGitSafe(issueInfo)}`;
-    return branchName.substr(0, this.maxNumOfChars);
+
+    const branchType = (options.branchType as BranchType) || this._appConfig.default_target_branch_type;
+
+    let branchName = '';
+    if (branchType.includes('user')) {
+      branchName = `${branchType}/${this.makeGitSafe(options.username)}/${this.makeGitSafe(issueInfo)}`;
+    } else {
+      branchName = `${branchType}/${this.makeGitSafe(issueInfo)}`;
+    }
+
+    const finalBranchName = branchName.substr(0, this.maxNumOfChars);
+    return finalBranchName;
   }
 
   private makeGitSafe(s: string): string {

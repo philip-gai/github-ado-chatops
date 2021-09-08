@@ -25,7 +25,8 @@ export const issueCommentHandler = async (octokit: Octokit, chatOpService: ChatO
       issueNumber: issueCommentPayload.issue.number,
       issueTitle: issueCommentPayload.issue.title,
       username: params['-username'] || issueCommentPayload.sender.login,
-      sourceBranch: params['-branch']
+      sourceBranch: params['-branch'],
+      branchType: params['-type']
     });
 
     await octokit.rest.issues.createComment({

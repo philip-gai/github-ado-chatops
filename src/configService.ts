@@ -2,24 +2,14 @@ import * as core from '@actions/core';
 import { AppConfig } from './appConfig';
 
 export class ConfigService {
-  static defaultAppConfig: AppConfig = {
-    ado_domain: 'dev.azure.com',
-    ado_org: '',
-    ado_pat: '',
-    ado_project: '',
-    ado_repo: '',
-    github_token: '',
-    default_source_branch: ''
-  };
-  appConfig: AppConfig = ConfigService.defaultAppConfig;
+  readonly appConfig: AppConfig;
 
   private constructor(appConfig: AppConfig) {
     this.appConfig = appConfig;
   }
 
   static async build(): Promise<ConfigService> {
-    const loadedConfig = this.loadConfig();
-    const config = ConfigService.mergeDefaults(loadedConfig);
+    const config = this.loadConfig();
     const errorMessages = ConfigService.validateConfig(config);
     if (errorMessages.length > 0) {
       const errorStr = errorMessages.join('\n');
@@ -37,14 +27,17 @@ export class ConfigService {
     const ado_pat = core.getInput('ado_pat');
     const github_token = core.getInput('github_token');
     const default_source_branch = core.getInput('default_source_branch');
+    const default_target_branch_type = core.getInput('default_target_branch_type');
 
     // debug is only output if you set the secret `ACTIONS_RUNNER_DEBUG` to true
-    core.info(`ado_domain: ${ado_domain}!`);
-    core.info(`ado_org: ${ado_org}!`);
-    core.info(`ado_project: ${ado_project}!`);
-    core.info(`ado_repo: ${ado_repo}!`);
-    core.info(`ado_pat: ${ado_pat != null ? '*******' : ''}!`);
-    core.info(`github_token: ${github_token != null ? '*******' : ''}!`);
+    core.info(`ado_domain: ${ado_domain}`);
+    core.info(`ado_org: ${ado_org}`);
+    core.info(`ado_project: ${ado_project}`);
+    core.info(`ado_repo: ${ado_repo}`);
+    core.info(`ado_pat: ${ado_pat != null ? '*******' : ''}`);
+    core.info(`github_token: ${github_token != null ? '*******' : ''}`);
+    core.info(`default_source_branch: ${default_source_branch}`);
+    core.info(`github_token: ${default_target_branch_type}`);
 
     return {
       ado_domain,
@@ -53,21 +46,10 @@ export class ConfigService {
       ado_repo,
       ado_pat,
       github_token,
-      default_source_branch
+      default_source_branch,
+      default_target_branch_type
     };
   };
-
-  private static mergeDefaults(loadedConfig: AppConfig): AppConfig {
-    return {
-      ado_domain: loadedConfig.ado_domain || ConfigService.defaultAppConfig.ado_domain,
-      ado_org: loadedConfig.ado_org,
-      ado_pat: loadedConfig.ado_pat,
-      ado_project: loadedConfig.ado_project,
-      ado_repo: loadedConfig.ado_repo,
-      github_token: loadedConfig.github_token,
-      default_source_branch: loadedConfig.default_source_branch
-    };
-  }
 
   private static validateConfig(config: AppConfig): string[] {
     const errorMessages: string[] = [];
