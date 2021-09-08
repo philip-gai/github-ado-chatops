@@ -33,16 +33,18 @@ async function run(): Promise<void> {
         core.info(`Comment: ${comment}`);
         const chatOpCommand = getChatOpCommand(chatOpService, comment);
         if (chatOpCommand === 'None') return core.info('Done.');
+
         const params = getParameters(chatOpService, chatOpCommand, comment);
+
         resultMessage = await azureDevOpsService.createBranch({
           issueNumber: issueCommentPayload.issue.number,
           issueTitle: issueCommentPayload.issue.title,
           username: params['-username'] || issueCommentPayload.sender.login,
           sourceBranch: params['-branch']
         });
+
         await octokit.rest.issues.createComment({
-          owner: context.issue.owner,
-          repo: context.issue.repo,
+          ...context.issue,
           issue_number: context.issue.number,
           body: resultMessage || 'There was nothing to do!'
         });
