@@ -198,7 +198,7 @@ class AzureDevOpsService {
                 core.info('Building branch name...');
                 const branchName = this.buildBranchName(options);
                 core.info(`Branch name: ${branchName}`);
-                this._adoClient.createBranch(branchName, options);
+                yield this._adoClient.createBranch(branchName, options);
                 // Create a comment with a link to the newly created branch
                 const successMessage = `Branch [${branchName}](${this.getBranchUrl(branchName)}) has been created in Azure DevOps`;
                 return successMessage;
