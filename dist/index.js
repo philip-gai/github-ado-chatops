@@ -38,10 +38,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.AzureDevOpsClient = void 0;
 const azdev = __importStar(__nccwpck_require__(7967));
 const core = __importStar(__nccwpck_require__(2186));
-const configService_1 = __nccwpck_require__(5460);
 class AzureDevOpsClient {
     constructor(appConfig, azDevClient) {
-        this._appConfig = configService_1.ConfigService.defaultAppConfig;
         this._appConfig = appConfig;
         this._azDevClient = azDevClient;
     }
@@ -218,8 +216,16 @@ class AzureDevOpsService {
     }
     buildBranchName(options) {
         const issueInfo = `${options.issueNumber}-${options.issueTitle.toLowerCase()}`;
-        const branchName = `users/${this.makeGitSafe(options.username)}/${this.makeGitSafe(issueInfo)}`;
-        return branchName.substr(0, this.maxNumOfChars);
+        const branchType = options.branchType || this._appConfig.default_target_branch_type;
+        let branchName = '';
+        if (branchType.includes('user')) {
+            branchName = `${branchType}/${this.makeGitSafe(options.username)}/${this.makeGitSafe(issueInfo)}`;
+        }
+        else {
+            branchName = `${branchType}/${this.makeGitSafe(issueInfo)}`;
+        }
+        const finalBranchName = branchName.substr(0, this.maxNumOfChars);
+        return finalBranchName;
     }
     makeGitSafe(s) {
         const replacementChar = '-';
@@ -289,7 +295,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.chatOps = exports.chatOpInfo = void 0;
 const createBranchChatOpInfo = {
     commands: ['/cb-ado', '/create-branch-ado'],
-    params: ['-branch', '-username']
+    params: ['-branch', '-username', '-type']
 };
 const chatOpInfo = [createBranchChatOpInfo];
 exports.chatOpInfo = chatOpInfo;
@@ -337,13 +343,11 @@ exports.ConfigService = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 class ConfigService {
     constructor(appConfig) {
-        this.appConfig = ConfigService.defaultAppConfig;
         this.appConfig = appConfig;
     }
     static build() {
         return __awaiter(this, void 0, void 0, function* () {
-            const loadedConfig = this.loadConfig();
-            const config = ConfigService.mergeDefaults(loadedConfig);
+            const config = this.loadConfig();
             const errorMessages = ConfigService.validateConfig(config);
             if (errorMessages.length > 0) {
                 const errorStr = errorMessages.join('\n');
@@ -352,17 +356,6 @@ class ConfigService {
             }
             return new ConfigService(config);
         });
-    }
-    static mergeDefaults(loadedConfig) {
-        return {
-            ado_domain: loadedConfig.ado_domain || ConfigService.defaultAppConfig.ado_domain,
-            ado_org: loadedConfig.ado_org,
-            ado_pat: loadedConfig.ado_pat,
-            ado_project: loadedConfig.ado_project,
-            ado_repo: loadedConfig.ado_repo,
-            github_token: loadedConfig.github_token,
-            default_source_branch: loadedConfig.default_source_branch
-        };
     }
     static validateConfig(config) {
         const errorMessages = [];
@@ -383,15 +376,6 @@ class ConfigService {
     }
 }
 exports.ConfigService = ConfigService;
-ConfigService.defaultAppConfig = {
-    ado_domain: 'dev.azure.com',
-    ado_org: '',
-    ado_pat: '',
-    ado_project: '',
-    ado_repo: '',
-    github_token: '',
-    default_source_branch: ''
-};
 ConfigService.loadConfig = () => {
     const ado_domain = core.getInput('ado_domain');
     const ado_org = core.getInput('ado_org');
@@ -400,13 +384,16 @@ ConfigService.loadConfig = () => {
     const ado_pat = core.getInput('ado_pat');
     const github_token = core.getInput('github_token');
     const default_source_branch = core.getInput('default_source_branch');
+    const defaultTargetBranchType = core.getInput('default_target_branch_type');
     // debug is only output if you set the secret `ACTIONS_RUNNER_DEBUG` to true
-    core.info(`ado_domain: ${ado_domain}!`);
-    core.info(`ado_org: ${ado_org}!`);
-    core.info(`ado_project: ${ado_project}!`);
-    core.info(`ado_repo: ${ado_repo}!`);
-    core.info(`ado_pat: ${ado_pat != null ? '*******' : ''}!`);
-    core.info(`github_token: ${github_token != null ? '*******' : ''}!`);
+    core.info(`ado_domain: ${ado_domain}`);
+    core.info(`ado_org: ${ado_org}`);
+    core.info(`ado_project: ${ado_project}`);
+    core.info(`ado_repo: ${ado_repo}`);
+    core.info(`ado_pat: ${ado_pat != null ? '*******' : ''}`);
+    core.info(`github_token: ${github_token != null ? '*******' : ''}`);
+    core.info(`default_source_branch: ${default_source_branch}`);
+    core.info(`github_token: ${defaultTargetBranchType}`);
     return {
         ado_domain,
         ado_org,
@@ -414,7 +401,8 @@ ConfigService.loadConfig = () => {
         ado_repo,
         ado_pat,
         github_token,
-        default_source_branch
+        default_source_branch,
+        default_target_branch_type: defaultTargetBranchType
     };
 };
 
@@ -474,7 +462,8 @@ const issueCommentHandler = (octokit, chatOpService, azureDevOpsService) => __aw
             issueNumber: issueCommentPayload.issue.number,
             issueTitle: issueCommentPayload.issue.title,
             username: params['-username'] || issueCommentPayload.sender.login,
-            sourceBranch: params['-branch']
+            sourceBranch: params['-branch'],
+            branchType: params['-type']
         });
         yield octokit.rest.issues.createComment(Object.assign(Object.assign({}, utils_1.context.issue), { issue_number: utils_1.context.issue.number, body: resultMessage || 'There was nothing to do!' }));
     }
