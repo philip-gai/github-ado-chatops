@@ -242,17 +242,16 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.ChatOpService = void 0;
 const chatOps_1 = __nccwpck_require__(7118);
 class ChatOpService {
-    constructor() { }
     static build() {
         return new ChatOpService();
     }
     getChatOpCommand(comment) {
         const command = this.getCommandString(comment);
-        return chatOps_1.chatOps.find(op => op === command) || 'None';
+        return chatOps_1.chatOps.find((op) => op === command) || 'None';
     }
     getParameterValues(command, comment) {
         var _a;
-        const possibleParams = ((_a = chatOps_1.chatOpInfo.find(info => info.commands.includes(command))) === null || _a === void 0 ? void 0 : _a.params) || [];
+        const possibleParams = ((_a = chatOps_1.chatOpInfo.find((info) => info.commands.includes(command))) === null || _a === void 0 ? void 0 : _a.params) || [];
         if (possibleParams.length === 0)
             return {};
         const paramValueMap = {};
@@ -501,7 +500,11 @@ function run() {
             core.info(resultMessage);
         }
         catch (error) {
-            core.setFailed((error === null || error === void 0 ? void 0 : error.message) || error || `An unknown error has occurred: ${error}`);
+            let errorMessage = 'An unknown error has occurred';
+            if (error instanceof Error) {
+                errorMessage = error.message;
+            }
+            core.setFailed(errorMessage);
         }
     });
 }
