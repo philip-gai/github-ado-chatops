@@ -38,7 +38,7 @@ export class ConfigService {
     core.info(`ado_pat: ${ado_pat != null ? '*******' : ''}`);
     core.info(`github_token: ${github_token != null ? '*******' : ''}`);
     core.info(`default_source_branch: ${default_source_branch}`);
-    core.info(`github_token: ${defaultTargetBranchType}`);
+    core.info(`default_target_branch_type: ${defaultTargetBranchType}`);
 
     return {
       ado_domain,
