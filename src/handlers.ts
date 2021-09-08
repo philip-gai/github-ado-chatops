@@ -30,13 +30,24 @@ export const issueCommentHandler = async (octokit: Octokit, chatOpService: ChatO
 
     const params = getParameters(chatOpService, chatOpCommand, comment);
 
-    resultMessage = await azureDevOpsService.createBranch({
-      issueNumber: issueCommentPayload.issue.number,
-      issueTitle: issueCommentPayload.issue.title,
-      username: params['-username'] || issueCommentPayload.sender.login,
-      sourceBranch: params['-branch'],
-      branchType: params['-type']
-    });
+    try {
+      resultMessage = await azureDevOpsService.createBranch({
+        issueNumber: issueCommentPayload.issue.number,
+        issueTitle: issueCommentPayload.issue.title,
+        username: params['-username'] || issueCommentPayload.sender.login,
+        sourceBranch: params['-branch'],
+        branchType: params['-type']
+      });
+    } catch (error: unknown) {
+      let errorMessage = 'Failed';
+      if (error instanceof Error) {
+        errorMessage = error.message;
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+      resultMessage = errorMessage;
+      core.setFailed(errorMessage);
+    }
 
     updatedComment += `\n1. ${resultMessage}`;
 
