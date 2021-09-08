@@ -7,8 +7,8 @@ import { IGitApi } from 'azure-devops-node-api/GitApi';
 import { AppConfig } from './appConfig';
 
 export class AzureDevOpsClient {
-  private _appConfig: AppConfig = ConfigService.defaultAppConfig;
-  private _azDevClient: azdev.WebApi;
+  private readonly _appConfig: AppConfig;
+  private readonly _azDevClient: azdev.WebApi;
 
   private constructor(appConfig: AppConfig, azDevClient: azdev.WebApi) {
     this._appConfig = appConfig;
