@@ -1,5 +1,6 @@
 import * as core from '@actions/core';
 import { AppConfig } from './appConfig';
+import { BranchType } from './branchType';
 
 export class ConfigService {
   readonly appConfig: AppConfig;
@@ -27,7 +28,7 @@ export class ConfigService {
     const ado_pat = core.getInput('ado_pat');
     const github_token = core.getInput('github_token');
     const default_source_branch = core.getInput('default_source_branch');
-    const default_target_branch_type = core.getInput('default_target_branch_type');
+    const defaultTargetBranchType = core.getInput('default_target_branch_type');
 
     // debug is only output if you set the secret `ACTIONS_RUNNER_DEBUG` to true
     core.info(`ado_domain: ${ado_domain}`);
@@ -37,7 +38,7 @@ export class ConfigService {
     core.info(`ado_pat: ${ado_pat != null ? '*******' : ''}`);
     core.info(`github_token: ${github_token != null ? '*******' : ''}`);
     core.info(`default_source_branch: ${default_source_branch}`);
-    core.info(`github_token: ${default_target_branch_type}`);
+    core.info(`github_token: ${defaultTargetBranchType}`);
 
     return {
       ado_domain,
@@ -47,7 +48,7 @@ export class ConfigService {
       ado_pat,
       github_token,
       default_source_branch,
-      default_target_branch_type
+      default_target_branch_type: defaultTargetBranchType as BranchType
     };
   };
 
