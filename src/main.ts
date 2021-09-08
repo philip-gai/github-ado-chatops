@@ -28,10 +28,12 @@ async function run(): Promise<void> {
       resultMessage = await issueCommentHandler(octokit, chatOpService, azureDevOpsService);
     }
     core.info(resultMessage);
-  } catch (error) {
+  } catch (error: unknown) {
     let errorMessage = 'An unknown error has occurred';
     if (error instanceof Error) {
       errorMessage = error.message;
+    } else if (typeof error === 'string') {
+      errorMessage = error;
     }
     core.setFailed(errorMessage);
   }

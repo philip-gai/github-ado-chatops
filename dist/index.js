@@ -193,21 +193,14 @@ class AzureDevOpsService {
     }
     createBranch(options) {
         return __awaiter(this, void 0, void 0, function* () {
-            try {
-                // Build the branch name from the issue title
-                core.info('Building branch name...');
-                const branchName = this.buildBranchName(options);
-                core.info(`Branch name: ${branchName}`);
-                yield this._adoClient.createBranch(branchName, options);
-                // Create a comment with a link to the newly created branch
-                const successMessage = `Branch [${branchName}](${this.getBranchUrl(branchName)}) has been created in Azure DevOps`;
-                return successMessage;
-            }
-            catch (e) {
-                const errorMessage = `Failed creating the branch in ADO: ${e}`;
-                core.error(errorMessage);
-                return errorMessage;
-            }
+            // Build the branch name from the issue title
+            core.info('Building branch name...');
+            const branchName = this.buildBranchName(options);
+            core.info(`Branch name: ${branchName}`);
+            yield this._adoClient.createBranch(branchName, options);
+            // Create a comment with a link to the newly created branch
+            const successMessage = `Branch [${branchName}](${this.getBranchUrl(branchName)}) has been created in Azure DevOps`;
+            return successMessage;
         });
     }
     getBranchUrl(branchName) {
@@ -461,13 +454,26 @@ const issueCommentHandler = (octokit, chatOpService, azureDevOpsService) => __aw
         updatedComment += '\n1. Creating the branch in ADO...';
         yield octokit.rest.issues.updateComment(Object.assign(Object.assign({}, utils_1.context.issue), { comment_id: issueCommentPayload.comment.id, body: updatedComment }));
         const params = getParameters(chatOpService, chatOpCommand, comment);
-        resultMessage = yield azureDevOpsService.createBranch({
-            issueNumber: issueCommentPayload.issue.number,
-            issueTitle: issueCommentPayload.issue.title,
-            username: params['-username'] || issueCommentPayload.sender.login,
-            sourceBranch: params['-branch'],
-            branchType: params['-type']
-        });
+        try {
+            resultMessage = yield azureDevOpsService.createBranch({
+                issueNumber: issueCommentPayload.issue.number,
+                issueTitle: issueCommentPayload.issue.title,
+                username: params['-username'] || issueCommentPayload.sender.login,
+                sourceBranch: params['-branch'],
+                branchType: params['-type']
+            });
+        }
+        catch (error) {
+            let errorMessage = 'Failed';
+            if (error instanceof Error) {
+                errorMessage = error.message;
+            }
+            else if (typeof error === 'string') {
+                errorMessage = error;
+            }
+            resultMessage = errorMessage;
+            core.setFailed(errorMessage);
+        }
         updatedComment += `\n1. ${resultMessage}`;
         yield octokit.rest.issues.updateComment(Object.assign(Object.assign({}, utils_1.context.issue), { comment_id: issueCommentPayload.comment.id, body: updatedComment }));
     }
@@ -556,6 +562,9 @@ function run() {
             let errorMessage = 'An unknown error has occurred';
             if (error instanceof Error) {
                 errorMessage = error.message;
+            }
+            else if (typeof error === 'string') {
+                errorMessage = error;
             }
             core.setFailed(errorMessage);
         }

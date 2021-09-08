@@ -33,22 +33,16 @@ export class AzureDevOpsService {
   }
 
   async createBranch(options: CreateBranchOptions): Promise<string> {
-    try {
-      // Build the branch name from the issue title
-      core.info('Building branch name...');
-      const branchName = this.buildBranchName(options);
-      core.info(`Branch name: ${branchName}`);
+    // Build the branch name from the issue title
+    core.info('Building branch name...');
+    const branchName = this.buildBranchName(options);
+    core.info(`Branch name: ${branchName}`);
 
-      await this._adoClient.createBranch(branchName, options);
+    await this._adoClient.createBranch(branchName, options);
 
-      // Create a comment with a link to the newly created branch
-      const successMessage = `Branch [${branchName}](${this.getBranchUrl(branchName)}) has been created in Azure DevOps`;
-      return successMessage;
-    } catch (e: unknown) {
-      const errorMessage = `Failed creating the branch in ADO: ${e}`;
-      core.error(errorMessage);
-      return errorMessage;
-    }
+    // Create a comment with a link to the newly created branch
+    const successMessage = `Branch [${branchName}](${this.getBranchUrl(branchName)}) has been created in Azure DevOps`;
+    return successMessage;
   }
 
   private getBranchUrl(branchName: string): string {
