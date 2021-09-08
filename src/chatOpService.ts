@@ -1,19 +1,24 @@
-import { ChatOpCommand, ChatOpParam, ParamValueMap, chatOpInfo, chatOps } from './chatOps';
+import {
+  ChatOpCommand,
+  ChatOpParam,
+  ParamValueMap,
+  chatOpInfo,
+  chatOps
+} from './chatOps';
 
 export class ChatOpService {
-  private constructor() {}
-
   static build(): ChatOpService {
     return new ChatOpService();
   }
 
   getChatOpCommand(comment: string): ChatOpCommand {
     const command = this.getCommandString(comment);
-    return chatOps.find(op => op === command) || 'None';
+    return chatOps.find((op) => op === command) || 'None';
   }
 
   getParameterValues(command: ChatOpCommand, comment: string): ParamValueMap {
-    const possibleParams = chatOpInfo.find(info => info.commands.includes(command))?.params || [];
+    const possibleParams =
+      chatOpInfo.find((info) => info.commands.includes(command))?.params || [];
     if (possibleParams.length === 0) return {};
     const paramValueMap: ParamValueMap = {};
     for (const pp of possibleParams) {

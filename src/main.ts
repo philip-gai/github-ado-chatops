@@ -5,7 +5,6 @@ import { ActionEvent } from './actionEvent';
 import { AzureDevOpsService } from './azureDevOpsService';
 import { ChatOpService } from './chatOpService';
 import { ConfigService } from './configService';
-// eslint-disable-next-line import/no-unresolved
 import { IssueCommentEvent } from '@octokit/webhooks-definitions/schema';
 import { Octokit } from '@octokit/rest';
 import { context } from '@actions/github/lib/utils';
@@ -23,7 +22,9 @@ async function run(): Promise<void> {
     // The YML workflow will need to set myToken with the GitHub Secret Token
     // github_token: ${{ secrets.GITHUB_TOKEN }}
     // https://help.github.com/en/actions/automating-your-workflow-with-github-actions/authenticating-with-the-github_token#about-the-github_token-secret
-    const octokit = github.getOctokit(configService.appConfig.github_token) as Octokit;
+    const octokit = github.getOctokit(
+      configService.appConfig.github_token
+    ) as Octokit;
 
     const chatOpService = ChatOpService.build();
     const azureDevOpsService = await AzureDevOpsService.build(configService);
@@ -55,18 +56,29 @@ async function run(): Promise<void> {
     }
     core.info(resultMessage);
   } catch (error) {
-    core.setFailed(error?.message || error || `An unknown error has occurred: ${error}`);
+    let errorMessage = 'An unknown error has occurred';
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    core.setFailed(errorMessage);
   }
 }
 
-function getChatOpCommand(chatOpService: ChatOpService, comment: string): ChatOpCommand {
+function getChatOpCommand(
+  chatOpService: ChatOpService,
+  comment: string
+): ChatOpCommand {
   core.info('Checking for ChatOp command...');
   const chatOpCommand = chatOpService.getChatOpCommand(comment);
   core.info(`Found ChatOp: ${chatOpCommand}`);
   return chatOpCommand;
 }
 
-function getParameters(chatOpService: ChatOpService, chatOpCommand: ChatOpCommand, comment: string): ParamValueMap {
+function getParameters(
+  chatOpService: ChatOpService,
+  chatOpCommand: ChatOpCommand,
+  comment: string
+): ParamValueMap {
   core.info('Getting parameters...');
   const paramValues = chatOpService.getParameterValues(chatOpCommand, comment);
   for (const key of Object.keys(paramValues)) {

@@ -23,7 +23,9 @@ export class AzureDevOpsService {
     this._adoClient = adoClient;
   }
 
-  static async build(configService: ConfigService): Promise<AzureDevOpsService> {
+  static async build(
+    configService: ConfigService
+  ): Promise<AzureDevOpsService> {
     const appConfig = configService.appConfig;
     const adoClient = await AzureDevOpsClient.build(configService);
     return new AzureDevOpsService(appConfig, adoClient);
@@ -39,7 +41,9 @@ export class AzureDevOpsService {
       this._adoClient.createBranch(branchName, options);
 
       // Create a comment with a link to the newly created branch
-      const successMessage = `Branch [${branchName}](${this.getBranchUrl(branchName)}) has been created in Azure DevOps`;
+      const successMessage = `Branch [${branchName}](${this.getBranchUrl(
+        branchName
+      )}) has been created in Azure DevOps`;
       return successMessage;
     } catch (e: unknown) {
       const errorMessage = `Failed creating the branch in ADO: ${e}`;
@@ -54,8 +58,12 @@ export class AzureDevOpsService {
   }
 
   private buildBranchName(options: CreateBranchOptions): string {
-    const issueInfo = `${options.issueNumber}-${options.issueTitle.toLowerCase()}`;
-    const branchName = `users/${this.makeGitSafe(options.username)}/${this.makeGitSafe(issueInfo)}`;
+    const issueInfo = `${
+      options.issueNumber
+    }-${options.issueTitle.toLowerCase()}`;
+    const branchName = `users/${this.makeGitSafe(
+      options.username
+    )}/${this.makeGitSafe(issueInfo)}`;
     return branchName.substr(0, this.maxNumOfChars);
   }
 
