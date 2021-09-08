@@ -465,10 +465,6 @@ function run() {
             core.info(`Action: ${utils_1.context.payload.action || 'Unknown'}`);
             core.info('Initializaing services...');
             const configService = yield configService_1.ConfigService.build();
-            // This should be a token with access to your repository scoped in as a secret.
-            // The YML workflow will need to set myToken with the GitHub Secret Token
-            // github_token: ${{ secrets.GITHUB_TOKEN }}
-            // https://help.github.com/en/actions/automating-your-workflow-with-github-actions/authenticating-with-the-github_token#about-the-github_token-secret
             const octokit = github.getOctokit(configService.appConfig.github_token);
             const chatOpService = chatOpService_1.ChatOpService.build();
             const azureDevOpsService = yield azureDevOpsService_1.AzureDevOpsService.build(configService);
