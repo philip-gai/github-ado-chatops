@@ -38,7 +38,8 @@ export const issueCommentHandler = async (octokit: Octokit, chatOpService: ChatO
         issueTitle: issueCommentPayload.issue.title,
         username: params['-username'] || issueCommentPayload.sender.login,
         sourceBranch: params['-branch'],
-        branchType: params['-type']
+        branchType: params['-type'],
+        branchName: params['-name']
       });
     } catch (error: unknown) {
       let errorMessage = 'Failed';

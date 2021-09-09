@@ -468,7 +468,8 @@ const issueCommentHandler = (octokit, chatOpService, azureDevOpsService) => __aw
                 issueTitle: issueCommentPayload.issue.title,
                 username: params['-username'] || issueCommentPayload.sender.login,
                 sourceBranch: params['-branch'],
-                branchType: params['-type']
+                branchType: params['-type'],
+                branchName: params['-name']
             });
         }
         catch (error) {
