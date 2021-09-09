@@ -8,7 +8,7 @@ Integrate GitHub with Azure DevOps via ChatOps! 🚀
 
 | Command | Aliases | Description | Options | Context |
 | ------------- | ------------- | ------------- | ------------- | ------------- |
-| `/cb-ado`  | `/create-branch-ado` | Creates a branch in Azure DevOps using information from the issue.<br/>Default: `users/{githubUsername}/{issueNumber}-{issueName}-{issueTitle}`. | <ul><li>`-username`: The username to use in your branch name.<br/>Default: GitHub username</li><li>`-branch`: The branch to branch from.<br/>Default: The default branch set in ADO</li></ul> | Issues |
+| `/cb-ado`  | `/create-branch-ado` | Creates a branch in Azure DevOps using information from the issue.<br/>Default: `feature/{issueNumber}-{issueName}-{issueTitle}`. | <ul><li>`-username`: The username to use in your branch name.<br/>Default: GitHub username</li><li>`-branch`: The branch to branch from.<br/>Default: The default branch set in ADO</li><li>`-type`: The type of branch to make (aka the first part of the branch name path).<br/>Valid values are 'bug'/'bugs', 'feature'/'features', 'release'/'releases' or 'user'/'users'.<br/>Default: `feature`</li></ul> | Issues |
 
 ## Getting Started
 
@@ -17,36 +17,17 @@ Integrate GitHub with Azure DevOps via ChatOps! 🚀
 
 ### Usage
 1. Create a personal access token (PAT) for your ADO repository ([Use personal access tokens](https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?toc=%2Fazure%2Fdevops%2Forganizations%2Ftoc.json&bc=%2Fazure%2Fdevops%2Forganizations%2Fbreadcrumb%2Ftoc.json&view=azure-devops&tabs=preview-page))
+    1. Scopes: Custom Defined - Code (Read & Write)
 2. Create an encrypted secret named `ADO_PAT` in your GitHub repository with the ADO PAT token value ([Creating encrypted secrets for a repository](https://docs.github.com/en/actions/reference/encrypted-secrets#creating-encrypted-secrets-for-a-repository)).
-3. Create a workflow file in your GitHub repo with the path `.github/workflows/github-ado-chatops.yml` with the following:
-```
-name: "Run Azure DevOps ChatOps"
-
-on:
-  issue_comment:
-    types: [created]
-
-permissions:
-  issues: write
-
-jobs:
-  run-github-ado-chatops:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: philip-gai/github-ado-chatops
-        with:
-          ado_org: philip-gai
-          ado_project: github-ado-chatops
-          ado_repo: github-ado-chatops
-          ado_pat: ${{ secrets.ADO_PAT }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-```
+3. Create a workflow file in your GitHub repo with the path `.github/workflows/github-ado-chatops.yml` [by following this example](https://github.dev/philip-gai/github-ado-chatops/blob/3196eea8f0f1a21f65abf9db3e8a3b2facb2c45c/.github/workflows/github-ado-chatops.yml), updating the input parameters with your relevant ADO repo information.
 4. You can now use ADO ChatOps in your GitHub repo! 🎉🎉🎉
-5. On any Issue, try the `/cb-ado` command and enjoy 😍
+5. Test it out! On any Issue, try the `/cb-ado` command and enjoy 😍
+
+#### Inputs
+You can view the inputs defined in [action.yml](https://github.dev/philip-gai/github-ado-chatops/blob/cc51fe22465d03e909881377d2e5941899826607/action.yml)
 
 ### Debugging
-1. Set a secret in your repo named `ACTIONS_RUNNER_DEBUG` to `true` to get debug logging ([Reference](https://docs.github.com/en/actions/monitoring-and-troubleshooting-workflows/enabling-debug-logging))
+1. Set a secret in your repo named `ACTIONS_STEP_DEBUG` to `true` to get debug logging ([Reference](https://docs.github.com/en/actions/monitoring-and-troubleshooting-workflows/enabling-debug-logging))
 
 ## Feature Requests and Feedback
 I would love to hear your feedback. Let me know if you've run into any bugs, or have any feature requests.
