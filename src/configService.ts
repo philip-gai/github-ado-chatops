@@ -31,14 +31,14 @@ export class ConfigService {
     const defaultTargetBranchType = core.getInput('default_target_branch_type');
 
     // debug is only output if you set the secret `ACTIONS_RUNNER_DEBUG` to true
-    core.info(`ado_domain: ${ado_domain}`);
-    core.info(`ado_org: ${ado_org}`);
-    core.info(`ado_project: ${ado_project}`);
-    core.info(`ado_repo: ${ado_repo}`);
-    core.info(`ado_pat: ${ado_pat != null ? '*******' : ''}`);
-    core.info(`github_token: ${github_token != null ? '*******' : ''}`);
-    core.info(`default_source_branch: ${default_source_branch}`);
-    core.info(`default_target_branch_type: ${defaultTargetBranchType}`);
+    core.debug(`ado_domain: ${ado_domain}`);
+    core.debug(`ado_org: ${ado_org}`);
+    core.debug(`ado_project: ${ado_project}`);
+    core.debug(`ado_repo: ${ado_repo}`);
+    core.debug(`ado_pat: ${ado_pat != null ? '*******' : ''}`);
+    core.debug(`github_token: ${github_token != null ? '*******' : ''}`);
+    core.debug(`default_source_branch: ${default_source_branch}`);
+    core.debug(`default_target_branch_type: ${defaultTargetBranchType}`);
 
     return {
       ado_domain,

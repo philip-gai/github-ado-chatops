@@ -16,8 +16,10 @@ export const issueCommentHandler = async (octokit: Octokit, chatOpService: ChatO
     const chatOpCommand = getChatOpCommand(chatOpService, comment);
 
     if (chatOpCommand === 'None') {
-      core.info('Done.');
+      core.info('No ChatOp found');
       process.exit(core.ExitCode.Success);
+    } else {
+      core.info(`Found ChatOp: ${chatOpCommand}`);
     }
 
     updatedComment += '\n1. Creating the branch in ADO...';
@@ -61,18 +63,17 @@ export const issueCommentHandler = async (octokit: Octokit, chatOpService: ChatO
 };
 
 function getChatOpCommand(chatOpService: ChatOpService, comment: string): ChatOpCommand {
-  core.info('Checking for ChatOp command...');
+  core.debug('Checking for ChatOp command...');
   const chatOpCommand = chatOpService.getChatOpCommand(comment);
-  core.info(`Found ChatOp: ${chatOpCommand}`);
   return chatOpCommand;
 }
 
 function getParameters(chatOpService: ChatOpService, chatOpCommand: ChatOpCommand, comment: string): ParamValueMap {
-  core.info('Getting parameters...');
+  core.debug('Getting parameters...');
   const paramValues = chatOpService.getParameterValues(chatOpCommand, comment);
   for (const key of Object.keys(paramValues)) {
     const value = paramValues[key as ChatOpParam];
-    core.info(`Found ${key} ${value}`);
+    core.debug(`Found ${key} ${value}`);
   }
   return paramValues;
 }
