@@ -272,7 +272,7 @@ class ChatOpService {
         return command;
     }
     getParamValue(param, comment) {
-        const splitResult = comment.split(param);
+        const splitResult = comment.split(` ${param}`);
         if (splitResult.length < 2)
             return '';
         const theRest = splitResult[1].trim();
