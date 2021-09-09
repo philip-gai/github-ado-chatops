@@ -28,7 +28,7 @@ export class ChatOpService {
   }
 
   private getParamValue(param: ChatOpParam, comment: string): string {
-    const splitResult = comment.split(param);
+    const splitResult = comment.split(` ${param}`);
     if (splitResult.length < 2) return '';
     const theRest = splitResult[1].trim();
     return theRest.split(' ')[0];
