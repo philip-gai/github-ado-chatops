@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "description": "Integrates GitHub with Azure DevOps via ChatOps",
-  "author": "Philip Gai <philip-gai@github.com>",
+  "author": "Philip Gai <philipmgai@gmail.com>",
   "license": "MIT",
   "homepage": "https://github.com/philip-gai/github-ado-chatops",
   "keywords": [
