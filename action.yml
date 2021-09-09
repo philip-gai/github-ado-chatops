@@ -30,7 +30,7 @@ inputs:
   default_target_branch_type:
     description: "The default branch type to use when none is specified"
     required: true
-    default: 'features'
+    default: 'feature'
 runs:
   using: "node12"
   main: "dist/index.js"

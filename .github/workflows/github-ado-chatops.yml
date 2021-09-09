@@ -1,10 +1,10 @@
-name: "Run Azure DevOps ChatOps from Source"
+name: "Azure DevOps ChatOps"
 
 on:
   issue_comment:
     types: [created]
 
-permissions:
+permissions: # GITHUB_TOKEN will have the minimum permissions required to run the ChatOps
   issues: write
 
 jobs:
@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: ./
+      - uses: philip-gai/github-ado-chatops # you should specify a version here to avoid breaking changes
         with:
           ado_org: philip-gai
           ado_project: github-ado-chatops

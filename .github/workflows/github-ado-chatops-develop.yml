@@ -1,4 +1,4 @@
-name: "Run Azure DevOps ChatOps"
+name: "Azure DevOps ChatOps (develop)"
 
 on:
   issue_comment:
@@ -12,7 +12,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: philip-gai/github-ado-chatops
+        with:
+          ref: develop
+      - uses: ./
         with:
           ado_org: philip-gai
           ado_project: github-ado-chatops
