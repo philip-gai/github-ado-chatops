@@ -200,11 +200,11 @@ class AzureDevOpsService {
         return __awaiter(this, void 0, void 0, function* () {
             // Build the branch name from the issue title
             core.debug('Building branch name...');
-            const branchName = this.buildBranchName(options);
+            const branchName = options.branchName || this.buildBranchName(options);
             core.info(`Branch name: ${branchName}`);
             yield this._adoClient.createBranch(branchName, options);
             // Create a comment with a link to the newly created branch
-            const successMessage = `Created branch [${branchName}](${this.getBranchUrl(branchName)}) in Azure DevOps! 🚀`;
+            const successMessage = `Created branch [${branchName}](${this.getBranchUrl(branchName)}) 🚀`;
             return successMessage;
         });
     }
@@ -293,7 +293,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.chatOps = exports.chatOpInfo = void 0;
 const createBranchChatOpInfo = {
     commands: ['/cb-ado', '/create-branch-ado'],
-    params: ['-branch', '-username', '-type']
+    params: ['-branch', '-username', '-type', '-name']
 };
 const chatOpInfo = [createBranchChatOpInfo];
 exports.chatOpInfo = chatOpInfo;
@@ -459,7 +459,7 @@ const issueCommentHandler = (octokit, chatOpService, azureDevOpsService) => __aw
         else {
             core.info(`Found ChatOp: ${chatOpCommand}`);
         }
-        updatedComment += '\n1. Creating the branch in ADO...';
+        updatedComment += '\n1. Creating a branch in Azure DevOps...';
         yield octokit.rest.issues.updateComment(Object.assign(Object.assign({}, utils_1.context.issue), { comment_id: issueCommentPayload.comment.id, body: updatedComment }));
         const params = getParameters(chatOpService, chatOpCommand, comment);
         try {
