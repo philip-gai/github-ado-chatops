@@ -22,7 +22,7 @@ export const issueCommentHandler = async (octokit: Octokit, chatOpService: ChatO
       core.info(`Found ChatOp: ${chatOpCommand}`);
     }
 
-    updatedComment += '\n1. Creating the branch in ADO...';
+    updatedComment += '\n1. Creating a branch in Azure DevOps...';
 
     await octokit.rest.issues.updateComment({
       ...context.issue,
