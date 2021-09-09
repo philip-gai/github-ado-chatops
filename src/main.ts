@@ -10,18 +10,18 @@ import { issueCommentHandler } from './handlers';
 
 async function run(): Promise<void> {
   try {
-    core.info('Running GitHub <> ADO ChatOps...');
-    core.info(`Event: ${context.eventName}`);
-    core.info(`Action: ${context.payload.action || 'Unknown'}`);
+    core.info('Running ADO ChatOps...');
+    core.debug(`Event: ${context.eventName}`);
+    core.debug(`Action: ${context.payload.action || 'Unknown'}`);
 
-    core.info('Initializaing services...');
+    core.debug('Initializaing services...');
     const configService = await ConfigService.build();
 
     const octokit = github.getOctokit(configService.appConfig.github_token) as Octokit;
 
     const chatOpService = ChatOpService.build();
     const azureDevOpsService = await AzureDevOpsService.build(configService);
-    core.info('Done.');
+    core.debug('Done.');
 
     let resultMessage = '';
     if ((context.eventName as ActionEvent) === 'issue_comment') {

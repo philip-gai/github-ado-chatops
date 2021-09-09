@@ -25,18 +25,18 @@ export class AzureDevOpsClient {
 
   async createBranch(branchName: string, options: CreateBranchOptions): Promise<GitRefUpdateResult> {
     try {
-      core.info('Getting the ADO git API...');
+      core.debug('Getting the ADO git API...');
       const gitClient = await this._azDevClient.getGitApi();
-      core.info('Got it.');
-      core.info('Getting the repo...');
+      core.debug('Got it.');
+      core.debug('Getting the repo...');
       const repo = await this.getRepo(gitClient);
-      core.info('Got it.');
+      core.debug('Got it.');
 
       let sourceBranch = options.sourceBranch || this._appConfig.default_source_branch;
       if (!sourceBranch) {
-        core.info('Getting the default branch in ADO...');
+        core.debug('Getting the default branch in ADO...');
         sourceBranch = this.getDefaultBranch(repo);
-        core.info('Got it.');
+        core.debug('Got it.');
       }
       const result = await this.createBranchInner(branchName, sourceBranch, gitClient, repo);
       return result;
@@ -65,12 +65,12 @@ export class AzureDevOpsClient {
   }
 
   private async createBranchInner(branchName: string, sourceBranch: string, gitClient: IGitApi, repo: GitRepository): Promise<GitRefUpdateResult> {
-    core.debug(`Creating branch from ${sourceBranch}.`);
+    core.info(`Creating branch from ${sourceBranch}.`);
 
     core.debug(`Getting ${sourceBranch} refs...`);
     const gitRefs = await gitClient.getRefs(repo.id as string, this._appConfig.ado_project, sourceBranch);
     const sourceRef = gitRefs[0];
-    core.debug("Got 'em.");
+    core.debug(`Got it.\n${JSON.stringify(sourceRef)}`);
 
     const gitRefUpdates: GitRefUpdate[] = [
       {

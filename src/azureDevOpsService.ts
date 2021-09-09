@@ -34,14 +34,14 @@ export class AzureDevOpsService {
 
   async createBranch(options: CreateBranchOptions): Promise<string> {
     // Build the branch name from the issue title
-    core.info('Building branch name...');
+    core.debug('Building branch name...');
     const branchName = this.buildBranchName(options);
     core.info(`Branch name: ${branchName}`);
 
     await this._adoClient.createBranch(branchName, options);
 
     // Create a comment with a link to the newly created branch
-    const successMessage = `Branch [${branchName}](${this.getBranchUrl(branchName)}) has been created in Azure DevOps`;
+    const successMessage = `Created branch [${branchName}](${this.getBranchUrl(branchName)}) in Azure DevOps! 🚀`;
     return successMessage;
   }
 
