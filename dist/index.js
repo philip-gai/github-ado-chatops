@@ -95,9 +95,14 @@ class AzureDevOpsClient {
     createBranchInner(branchName, sourceBranch, gitClient, repo) {
         return __awaiter(this, void 0, void 0, function* () {
             core.info(`Creating branch from ${sourceBranch}.`);
-            core.debug(`Getting ${sourceBranch} refs...`);
-            const gitRefs = yield gitClient.getRefs(repo.id, this._appConfig.ado_project, sourceBranch);
+            const sourceBranchHeads = !sourceBranch.startsWith('heads/') ? `heads/${sourceBranch}` : sourceBranch;
+            core.debug(`Getting ${sourceBranchHeads} refs...`);
+            const gitRefs = yield gitClient.getRefs(repo.id, this._appConfig.ado_project, sourceBranchHeads);
             const sourceRef = gitRefs[0];
+            if (!sourceRef) {
+                core.error('Invalid source branch');
+                throw Error('Invalid source branch');
+            }
             core.debug(`Got it.\n${JSON.stringify(sourceRef)}`);
             const gitRefUpdates = [
                 {
