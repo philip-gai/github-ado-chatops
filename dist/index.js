@@ -55,17 +55,17 @@ class AzureDevOpsClient {
     createBranch(branchName, options) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                core.info('Getting the ADO git API...');
+                core.debug('Getting the ADO git API...');
                 const gitClient = yield this._azDevClient.getGitApi();
-                core.info('Got it.');
-                core.info('Getting the repo...');
+                core.debug('Got it.');
+                core.debug('Getting the repo...');
                 const repo = yield this.getRepo(gitClient);
-                core.info('Got it.');
+                core.debug('Got it.');
                 let sourceBranch = options.sourceBranch || this._appConfig.default_source_branch;
                 if (!sourceBranch) {
-                    core.info('Getting the default branch in ADO...');
+                    core.debug('Getting the default branch in ADO...');
                     sourceBranch = this.getDefaultBranch(repo);
-                    core.info('Got it.');
+                    core.debug('Got it.');
                 }
                 const result = yield this.createBranchInner(branchName, sourceBranch, gitClient, repo);
                 return result;
@@ -94,11 +94,11 @@ class AzureDevOpsClient {
     }
     createBranchInner(branchName, sourceBranch, gitClient, repo) {
         return __awaiter(this, void 0, void 0, function* () {
-            core.debug(`Creating branch from ${sourceBranch}.`);
+            core.info(`Creating branch from ${sourceBranch}.`);
             core.debug(`Getting ${sourceBranch} refs...`);
             const gitRefs = yield gitClient.getRefs(repo.id, this._appConfig.ado_project, sourceBranch);
             const sourceRef = gitRefs[0];
-            core.debug("Got 'em.");
+            core.debug(`Got it.\n${JSON.stringify(sourceRef)}`);
             const gitRefUpdates = [
                 {
                     oldObjectId: new Array(41).join('0'),
@@ -194,12 +194,12 @@ class AzureDevOpsService {
     createBranch(options) {
         return __awaiter(this, void 0, void 0, function* () {
             // Build the branch name from the issue title
-            core.info('Building branch name...');
+            core.debug('Building branch name...');
             const branchName = this.buildBranchName(options);
             core.info(`Branch name: ${branchName}`);
             yield this._adoClient.createBranch(branchName, options);
             // Create a comment with a link to the newly created branch
-            const successMessage = `Branch [${branchName}](${this.getBranchUrl(branchName)}) has been created in Azure DevOps`;
+            const successMessage = `Created branch [${branchName}](${this.getBranchUrl(branchName)}) in Azure DevOps! 🚀`;
             return successMessage;
         });
     }
@@ -379,14 +379,14 @@ ConfigService.loadConfig = () => {
     const default_source_branch = core.getInput('default_source_branch');
     const defaultTargetBranchType = core.getInput('default_target_branch_type');
     // debug is only output if you set the secret `ACTIONS_RUNNER_DEBUG` to true
-    core.info(`ado_domain: ${ado_domain}`);
-    core.info(`ado_org: ${ado_org}`);
-    core.info(`ado_project: ${ado_project}`);
-    core.info(`ado_repo: ${ado_repo}`);
-    core.info(`ado_pat: ${ado_pat != null ? '*******' : ''}`);
-    core.info(`github_token: ${github_token != null ? '*******' : ''}`);
-    core.info(`default_source_branch: ${default_source_branch}`);
-    core.info(`default_target_branch_type: ${defaultTargetBranchType}`);
+    core.debug(`ado_domain: ${ado_domain}`);
+    core.debug(`ado_org: ${ado_org}`);
+    core.debug(`ado_project: ${ado_project}`);
+    core.debug(`ado_repo: ${ado_repo}`);
+    core.debug(`ado_pat: ${ado_pat != null ? '*******' : ''}`);
+    core.debug(`github_token: ${github_token != null ? '*******' : ''}`);
+    core.debug(`default_source_branch: ${default_source_branch}`);
+    core.debug(`default_target_branch_type: ${defaultTargetBranchType}`);
     return {
         ado_domain,
         ado_org,
@@ -448,8 +448,11 @@ const issueCommentHandler = (octokit, chatOpService, azureDevOpsService) => __aw
         core.debug(`Comment: ${comment}`);
         const chatOpCommand = getChatOpCommand(chatOpService, comment);
         if (chatOpCommand === 'None') {
-            core.info('Done.');
+            core.info('No ChatOp found');
             process.exit(core.ExitCode.Success);
+        }
+        else {
+            core.info(`Found ChatOp: ${chatOpCommand}`);
         }
         updatedComment += '\n1. Creating the branch in ADO...';
         yield octokit.rest.issues.updateComment(Object.assign(Object.assign({}, utils_1.context.issue), { comment_id: issueCommentPayload.comment.id, body: updatedComment }));
@@ -481,17 +484,16 @@ const issueCommentHandler = (octokit, chatOpService, azureDevOpsService) => __aw
 });
 exports.issueCommentHandler = issueCommentHandler;
 function getChatOpCommand(chatOpService, comment) {
-    core.info('Checking for ChatOp command...');
+    core.debug('Checking for ChatOp command...');
     const chatOpCommand = chatOpService.getChatOpCommand(comment);
-    core.info(`Found ChatOp: ${chatOpCommand}`);
     return chatOpCommand;
 }
 function getParameters(chatOpService, chatOpCommand, comment) {
-    core.info('Getting parameters...');
+    core.debug('Getting parameters...');
     const paramValues = chatOpService.getParameterValues(chatOpCommand, comment);
     for (const key of Object.keys(paramValues)) {
         const value = paramValues[key];
-        core.info(`Found ${key} ${value}`);
+        core.debug(`Found ${key} ${value}`);
     }
     return paramValues;
 }
@@ -543,15 +545,15 @@ const handlers_1 = __nccwpck_require__(6851);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            core.info('Running GitHub <> ADO ChatOps...');
-            core.info(`Event: ${utils_1.context.eventName}`);
-            core.info(`Action: ${utils_1.context.payload.action || 'Unknown'}`);
-            core.info('Initializaing services...');
+            core.info('Running ADO ChatOps...');
+            core.debug(`Event: ${utils_1.context.eventName}`);
+            core.debug(`Action: ${utils_1.context.payload.action || 'Unknown'}`);
+            core.debug('Initializaing services...');
             const configService = yield configService_1.ConfigService.build();
             const octokit = github.getOctokit(configService.appConfig.github_token);
             const chatOpService = chatOpService_1.ChatOpService.build();
             const azureDevOpsService = yield azureDevOpsService_1.AzureDevOpsService.build(configService);
-            core.info('Done.');
+            core.debug('Done.');
             let resultMessage = '';
             if (utils_1.context.eventName === 'issue_comment') {
                 resultMessage = yield (0, handlers_1.issueCommentHandler)(octokit, chatOpService, azureDevOpsService);
