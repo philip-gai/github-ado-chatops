@@ -2,7 +2,7 @@
 
 Integrate GitHub with Azure DevOps via ChatOps! 🚀
 
-https://user-images.githubusercontent.com/17363579/132159736-93355b49-f446-427e-a9fc-fb78c6b54938.mov
+![image](https://user-images.githubusercontent.com/17363579/132613753-038124dc-fd52-4f61-a7eb-27a0cd8c960c.png)
 
 ## ChatOp Commands
 
@@ -43,6 +43,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 ```
 4. You can now use ADO ChatOps in your GitHub repo! 🎉🎉🎉
+5. On any Issue, try the `/cb-ado` command and enjoy 😍
 
 ### Debugging
 1. Set a secret in your repo named `ACTIONS_RUNNER_DEBUG` to `true` to get debug logging ([Reference](https://docs.github.com/en/actions/monitoring-and-troubleshooting-workflows/enabling-debug-logging))
