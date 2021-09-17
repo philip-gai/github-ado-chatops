@@ -21,7 +21,7 @@ Integrate GitHub with Azure DevOps via ChatOps! 🚀
 1. Create a personal access token (PAT) for your ADO repository ([Use personal access tokens](https://docs.microsoft.com/en-us/azure/devops/organizations/accounts/use-personal-access-tokens-to-authenticate?toc=%2Fazure%2Fdevops%2Forganizations%2Ftoc.json&bc=%2Fazure%2Fdevops%2Forganizations%2Fbreadcrumb%2Ftoc.json&view=azure-devops&tabs=preview-page))
     1. Scopes: Custom Defined - Code (Read & Write)
 2. Create an encrypted secret named `ADO_PAT` in your GitHub repository with the ADO PAT token value ([Creating encrypted secrets for a repository](https://docs.github.com/en/actions/reference/encrypted-secrets#creating-encrypted-secrets-for-a-repository)).
-3. Create a workflow file in your GitHub repo with the path `.github/workflows/github-ado-chatops.yml` [by following this example](.github/workflows/github-ado-chatops.yml), updating the input parameters with your relevant ADO repo information.
+3. Create a workflow file in your GitHub repo with the path `.github/workflows/ado-chatops.yml` [by following this example](.github/workflows/ado-chatops.yml), updating the input parameters with your relevant ADO repo information.
 4. You can now use ADO ChatOps in your GitHub repo! 🎉🎉🎉
 5. Test it out! On any Issue, try the `/cb-ado` command and enjoy 😍
 

@@ -14,8 +14,8 @@ jobs:
       - name: Azure DevOps ChatOps
         uses: philip-gai/github-ado-chatops@v1.0.0 # Check marketplace for the latest version
         with:
-          ado_org: philip-gai
-          ado_project: github-ado-chatops
-          ado_repo: github-ado-chatops
-          ado_pat: ${{ secrets.ADO_PAT }}
+          ado_org: philip-gai # replace
+          ado_project: github-ado-chatops # replace
+          ado_repo: github-ado-chatops # replace
+          ado_pat: ${{ secrets.ADO_PAT }} # make sure this matches the name of the secret you made
           github_token: ${{ secrets.GITHUB_TOKEN }}
