@@ -28,7 +28,7 @@ inputs:
     description: "The branch from which to branch from by default. This defaults to the main branch set in ADO"
     required: false
   default_target_branch_type:
-    description: "The default branch type to use when none is specified"
+    description: "The default branch type to use when none is specified. Valid values are user, users, bug, bugs, feature, features, release or releases. Default is feature"
     required: true
     default: 'feature'
 runs:
