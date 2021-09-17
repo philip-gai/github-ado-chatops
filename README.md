@@ -8,7 +8,7 @@ Integrate GitHub with Azure DevOps via ChatOps! 🚀
 
 | Command | Aliases | Description | Options | Context |
 | ------------- | ------------- | ------------- | ------------- | ------------- |
-| `/cb-ado`  | `/create-branch-ado` | Creates a branch in Azure DevOps using information from the issue.<br/>Default: `feature/{issueNumber}-{issueName}-{issueTitle}`. | <ul><li>`-username`: The username to use in your branch name.<br/>Default: GitHub username</li><li>`-branch`: The branch to branch from.<br/>Default: The default branch set in ADO</li><li>`-type`: The type of branch to make (aka the first part of the branch name path).<br/>Valid values are 'bug'/'bugs', 'feature'/'features', 'release'/'releases' or 'user'/'users'.<br/>Default: `feature`</li><li>`-name`: The branch name if you want to override any auto naming conventions.</li></ul> | Issues |
+| `/cb-ado`  | `/create-branch-ado` | Creates a branch in Azure DevOps using information from the issue.<br/>Default: `feature/{issueNumber}-{issueName}-{issueTitle}`. | <ul><li>`-username`: The username to use in your branch name.<br/>Default: GitHub username</li><li>`-branch`: The branch to branch from.<br/>Default: The default branch set in ADO</li><li>`-type`: The type of branch to make (aka the first part of the branch name path).<br/>Valid values are user, users, bug, bugs, feature, features, release or releases.<br/>Default: `feature`</li><li>`-name`: The branch name if you want to override any auto naming conventions.</li></ul> | Issues |
 
 ## Getting Started
 
@@ -25,9 +25,11 @@ Integrate GitHub with Azure DevOps via ChatOps! 🚀
 4. You can now use ADO ChatOps in your GitHub repo! 🎉🎉🎉
 5. Test it out! On any Issue, try the `/cb-ado` command and enjoy 😍
 
-#### Inputs
+#### Configuration
 
 You can view the inputs defined in [action.yml](action.yml)
+
+Add these to your workflow file under the `with` section.
 
 ### Debugging
 
