@@ -2,11 +2,9 @@ name: "CI - Azure DevOps ChatOps"
 
 on:
   pull_request:
+    branches: [ main, develop, "release/*" ]
   push:
-    branches:
-      - main
-      - develop
-      - "releases/*"
+    branches: [ main, develop, "release/*" ]
 
 permissions:
   issues: write
