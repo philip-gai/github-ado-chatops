@@ -1,5 +1,5 @@
 name: "Azure DevOps ChatOps"
-description: "Integrate GitHub with Azure DevOps via ChatOps"
+description: "Create a branch in Azure DevOps from GitHub and more via ChatOps! 🚀"
 author: "philip-gai"
 branding:
   icon: 'git-branch'  
