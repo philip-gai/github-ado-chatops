@@ -25,8 +25,13 @@ export class ConfigService {
     const ado_org = core.getInput('ado_org');
     const ado_project = core.getInput('ado_project');
     const ado_repo = core.getInput('ado_repo');
+
     const ado_pat = core.getInput('ado_pat');
+    core.setSecret(ado_pat);
+
     const github_token = core.getInput('github_token');
+    core.setSecret(github_token);
+
     const default_source_branch = core.getInput('default_source_branch');
     const defaultTargetBranchType = core.getInput('default_target_branch_type');
 
