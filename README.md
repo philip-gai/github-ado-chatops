@@ -2,7 +2,7 @@
 
 Integrate GitHub with Azure DevOps via ChatOps! 🚀
 
-![image](https://user-images.githubusercontent.com/17363579/132613753-038124dc-fd52-4f61-a7eb-27a0cd8c960c.png)
+![Demo](docs/assets/github-ado-chatops-demo.gif)
 
 ## ChatOp Commands
 
