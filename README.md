@@ -1,6 +1,6 @@
 # Azure DevOps ChatOps - GitHub Action
 
-![Build](https://github.com/philip-gai/github-ado-chatops/actions/workflows/ado-chatops.yml/badge.svg)
+[![CI](https://github.com/philip-gai/github-ado-chatops/actions/workflows/ci.yml/badge.svg)](https://github.com/philip-gai/github-ado-chatops/actions/workflows/ci.yml)
 ![Language Count](https://img.shields.io/github/languages/count/philip-gai/github-ado-chatops?label=Languages)
 ![Top Language](https://img.shields.io/github/languages/top/philip-gai/github-ado-chatops)
 ![GitHub Repo stars](https://img.shields.io/github/stars/philip-gai/github-ado-chatops?style=social)
