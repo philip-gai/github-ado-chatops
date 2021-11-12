@@ -1,5 +1,10 @@
 # Azure DevOps ChatOps - GitHub Action
 
+![Build](https://github.com/philip-gai/github-ado-chatops/actions/workflows/ado-chatops.yml/badge.svg)
+![Language Count](https://img.shields.io/github/languages/count/philip-gai/github-ado-chatops?label=Languages)
+![Top Language](https://img.shields.io/github/languages/top/philip-gai/github-ado-chatops)
+![GitHub Repo stars](https://img.shields.io/github/stars/philip-gai/github-ado-chatops?style=social)
+
 Integrate GitHub with Azure DevOps via ChatOps! 🚀
 
 ![Demo](docs/assets/github-ado-chatops-demo.gif)
